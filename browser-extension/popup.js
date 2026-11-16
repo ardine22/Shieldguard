@@ -31,6 +31,20 @@ async function verifyLicenseKey(key) {
   return parts[2] === hex.substring(0, 4) && parts[3] === hex.substring(4, 8);
 }
 
+// Get or generate persistent Device ID for browser
+async function getExtensionHwid() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(["extension_hwid"], (res) => {
+      if (res && res.extension_hwid) {
+        resolve(res.extension_hwid);
+      } else {
+        const id = "EXT-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-" + Date.now().toString(36).toUpperCase();
+        chrome.storage.local.set({ extension_hwid: id }, () => resolve(id));
+      }
+    });
+  });
+}
+
 function renderState(state) {
   appState = state || {};
   const isPro = state.is_pro_licensed === true;
@@ -140,6 +154,28 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("❌ Serial Key tidak valid!\n\nPastikan formatnya SGPRO-XXXX-XXXX-XXXX yang dihasilkan dari aplikasi 'ShieldGuard-Keygen-Admin.exe'.");
       return;
     }
+
+    // Cloud HWID 1-Device Check
+    const hwid = await getExtensionHwid();
+    try {
+      const cloudRes = await fetch("http://70.151.150.190/api/license/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key,
+          hwid,
+          buyer: name,
+          device_name: "Chrome/Edge Browser"
+        })
+      });
+      if (cloudRes.ok) {
+        const cloudData = await cloudRes.json();
+        if (cloudData.ok === false && cloudData.status === "DEVICE_MISMATCH") {
+          alert("❌ PELANGGARAN LISENSI (1 LISENSI = 1 DEVICE)!\n\n" + cloudData.message);
+          return;
+        }
+      }
+    } catch (_) {}
 
     // 1. Save directly to local storage
     await new Promise((resolve) => {

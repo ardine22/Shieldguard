@@ -42,6 +42,7 @@ namespace ShieldGuardApp
         public bool is_pro_licensed { get; set; }
         public string license_key { get; set; }
         public string licensed_to { get; set; }
+        public string bound_hwid { get; set; }
         public List<string> blocked_domains { get; set; }
         public List<string> whitelisted_domains { get; set; }
         public List<string> blocked_ips { get; set; }
@@ -136,6 +137,66 @@ namespace ShieldGuardApp
                 foreach (byte b in bytes) sb.Append(b.ToString("X2"));
                 string hex = sb.ToString();
                 return parts[2] == hex.Substring(0, 4) && parts[3] == hex.Substring(4, 4);
+            }
+        }
+
+        public static string GetHardwareId()
+        {
+            try
+            {
+                string guid = (string)Microsoft.Win32.Registry.GetValue(
+                    @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography",
+                    "MachineGuid", ""
+                );
+                if (!string.IsNullOrEmpty(guid))
+                {
+                    using (SHA256 sha = SHA256.Create())
+                    {
+                        byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes("HWID_SALT:" + guid));
+                        StringBuilder sb = new StringBuilder("HWID-");
+                        for (int i = 0; i < 4; i++) sb.Append(bytes[i].ToString("X2"));
+                        sb.Append("-");
+                        for (int i = 4; i < 8; i++) sb.Append(bytes[i].ToString("X2"));
+                        return sb.ToString();
+                    }
+                }
+            }
+            catch {}
+            return "HWID-" + Environment.MachineName.ToUpperInvariant();
+        }
+
+        public static Dictionary<string, object> ActivateCloudLicense(string key, string buyer, string hwid)
+        {
+            Dictionary<string, object> res = new Dictionary<string, object>();
+            try
+            {
+                string url = "http://70.151.150.190/api/license/activate";
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+                req.Method = "POST";
+                req.ContentType = "application/json; charset=utf-8";
+                req.Timeout = 4000;
+                JavaScriptSerializer ser = new JavaScriptSerializer();
+                Dictionary<string, string> payload = new Dictionary<string, string>();
+                payload["key"] = key;
+                payload["hwid"] = hwid;
+                payload["buyer"] = buyer;
+                payload["device_name"] = Environment.MachineName;
+                byte[] body = Encoding.UTF8.GetBytes(ser.Serialize(payload));
+                req.ContentLength = body.Length;
+                using (Stream s = req.GetRequestStream()) { s.Write(body, 0, body.Length); }
+                using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+                using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+                {
+                    string json = sr.ReadToEnd();
+                    return ser.Deserialize<Dictionary<string, object>>(json);
+                }
+            }
+            catch (Exception ex)
+            {
+                res["ok"] = true;
+                res["status"] = "OFFLINE_FALLBACK";
+                res["message"] = ex.Message;
+                return res;
             }
         }
 
@@ -641,9 +702,17 @@ namespace ShieldGuardApp
             {
                 Text = "Status Saat Ini: VERSI TRIAL GRATIS",
                 Font = new Font("Segoe UI", 11, FontStyle.Bold),
-                ForeColor = Color.FromArgb(251, 191, 36), Location = new Point(28, 62), AutoSize = true
+                ForeColor = Color.FromArgb(251, 191, 36), Location = new Point(28, 56), AutoSize = true
             };
             card.Controls.Add(lblLicenseStatus);
+
+            Label lHwid = new Label
+            {
+                Text = "🔒 Hardware ID (Kunci Perangkat Ini): " + GetHardwareId(),
+                Font = new Font("Consolas", 9.5f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(96, 165, 250), Location = new Point(28, 82), AutoSize = true
+            };
+            card.Controls.Add(lHwid);
 
             Label lName = new Label
             {
@@ -686,23 +755,41 @@ namespace ShieldGuardApp
             btnActivate.Click += delegate {
                 string key = txtLicenseKey.Text.Trim().ToUpperInvariant();
                 string owner = string.IsNullOrWhiteSpace(txtLicenseName.Text) ? "Pengguna Pro" : txtLicenseName.Text.Trim();
-                if (VerifyLicenseKey(key))
-                {
-                    lock (syncLock)
-                    {
-                        config.is_pro_licensed = true;
-                        config.license_key = key;
-                        config.licensed_to = owner;
-                    }
-                    AddLog("INFO", "LICENSE_PRO", owner, "Lisensi ShieldGuard PRO berhasil diaktifkan dengan key " + key, "ACTIVATED");
-                    SaveConfig();
-                    RefreshUIData();
-                    MessageBox.Show("🎉 Selamat! ShieldGuard PRO Edition berhasil diaktifkan untuk: " + owner, "Aktivasi Berhasil", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
+                if (!VerifyLicenseKey(key))
                 {
                     MessageBox.Show("❌ Serial Key tidak valid! Pastikan formatnya SGPRO-XXXX-XXXX-XXXX yang dibuat melalui ShieldGuard-Keygen-Admin.exe.", "Aktivasi Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
+
+                string hwid = GetHardwareId();
+                var cloudResp = ActivateCloudLicense(key, owner, hwid);
+
+                if (cloudResp.ContainsKey("ok") && Convert.ToBoolean(cloudResp["ok"]) == false && cloudResp.ContainsKey("status") && Convert.ToString(cloudResp["status"]) == "DEVICE_MISMATCH")
+                {
+                    string failMsg = cloudResp.ContainsKey("message") ? Convert.ToString(cloudResp["message"]) : "Serial Key ini sudah terikat pada perangkat lain!";
+                    MessageBox.Show(failMsg, "❌ Pelanggaran Lisensi (1 Device Lock)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                lock (syncLock)
+                {
+                    config.is_pro_licensed = true;
+                    config.license_key = key;
+                    config.licensed_to = owner;
+                    config.bound_hwid = hwid;
+                }
+                AddLog("INFO", "LICENSE_PRO", owner, "Lisensi ShieldGuard PRO berhasil dikunci pada perangkat " + hwid, "ACTIVATED");
+                SaveConfig();
+                RefreshUIData();
+                MessageBox.Show(
+                    "🎉 Selamat! ShieldGuard PRO Edition berhasil diaktifkan & terikat resmi ke komputer ini:\n\n" +
+                    "Hardware ID (HWID): " + hwid + "\n" +
+                    "Pemilik: " + owner + "\n\n" +
+                    "🛡️ 1 Lisensi aman terkunci hanya untuk komputer ini.",
+                    "Aktivasi Berhasil (1 Device Lock)",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
             };
             card.Controls.Add(btnActivate);
 
