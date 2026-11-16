@@ -2,8 +2,8 @@ const PC_API_BASE = "http://127.0.0.1:8765";
 
 const DEFAULT_STATE = {
   firewall_enabled: true,
-  scam_protection_enabled: true,
-  cookie_guard_enabled: true,
+  scam_protection_enabled: false,
+  cookie_guard_enabled: false,
   pc_connected: false,
   browser_device_id: "",
   is_pro_licensed: false,
@@ -307,7 +307,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       await saveState({
         is_pro_licensed: false,
         license_key: "",
-        licensed_to: "Versi Trial (Gratis)"
+        licensed_to: "Versi Trial (Gratis)",
+        scam_protection_enabled: false,
+        cookie_guard_enabled: false
       });
       sendResponse({ ok: true });
       return;
@@ -368,7 +370,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       await saveState({
         is_pro_licensed: true,
         license_key: key,
-        licensed_to: owner
+        licensed_to: owner,
+        scam_protection_enabled: true,
+        cookie_guard_enabled: true
       });
 
       // Forward activation to PC Firewall app if connected

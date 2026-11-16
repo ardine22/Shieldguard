@@ -94,8 +94,27 @@ function renderState(state) {
     mainBtn.className = "power-btn off";
   }
 
-  document.getElementById("chkScam").checked = state.scam_protection_enabled !== false;
-  document.getElementById("chkCookie").checked = state.cookie_guard_enabled !== false;
+  const chkScam = document.getElementById("chkScam");
+  const chkCookie = document.getElementById("chkCookie");
+  const rowScam = document.getElementById("rowScam");
+  const rowCookie = document.getElementById("rowCookie");
+
+  if (isPro) {
+    if (rowScam) rowScam.classList.remove("locked");
+    if (rowCookie) rowCookie.classList.remove("locked");
+    chkScam.disabled = false;
+    chkCookie.disabled = false;
+    chkScam.checked = state.scam_protection_enabled !== false;
+    chkCookie.checked = state.cookie_guard_enabled !== false;
+  } else {
+    // Locked in TRIAL mode: unchecked and disabled
+    if (rowScam) rowScam.classList.add("locked");
+    if (rowCookie) rowCookie.classList.add("locked");
+    chkScam.checked = false;
+    chkCookie.checked = false;
+    chkScam.disabled = true;
+    chkCookie.disabled = true;
+  }
 
   const stats = state.stats || {};
   const domains = state.blocked_domains || [];
@@ -219,6 +238,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const nextVal = !(appState.firewall_enabled !== false);
     chrome.runtime.sendMessage({ type: "TOGGLE_SETTING", key: "firewall_enabled", value: nextVal }, () => refreshPopup());
   });
+
+  // Prompt activation if user clicks locked Pro switches in Trial mode
+  const handleLockedClick = (e) => {
+    if (!appState.is_pro_licensed) {
+      e.preventDefault();
+      alert("🔒 Fitur Eksklusif ShieldGuard PRO!\n\nModul Deteksi Heuristik Scam & Pelindung Cookie terkunci pada Versi Trial.\n\nMasukkan Serial Key Pro di kotak aktivasi atas untuk membuka fitur ini!");
+      const keyInput = document.getElementById("licKeyInput");
+      if (keyInput) keyInput.focus();
+    }
+  };
+  const rowScamEl = document.getElementById("rowScam");
+  const rowCookieEl = document.getElementById("rowCookie");
+  if (rowScamEl) rowScamEl.addEventListener("click", handleLockedClick);
+  if (rowCookieEl) rowCookieEl.addEventListener("click", handleLockedClick);
 
   document.getElementById("chkScam").addEventListener("change", (e) => {
     if (!appState.is_pro_licensed && e.target.checked) {

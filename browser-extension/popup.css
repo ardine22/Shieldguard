@@ -300,6 +300,15 @@ body {
   cursor: pointer;
 }
 
+.switch-row.locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.switch-row.locked input {
+  cursor: not-allowed;
+}
+
 .pro-tag {
   background: #2563eb;
   color: #fff;
