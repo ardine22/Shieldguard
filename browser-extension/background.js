@@ -143,10 +143,10 @@ async function syncWithPCFirewall() {
     const data = await res.json();
     const current = await getState();
 
-    // Auto-activate extension Pro if PC app is licensed Pro
-    const isPro = data.is_pro_licensed === true || current.is_pro_licensed === true;
-    const licKey = (data.is_pro_licensed ? data.license_key : "") || current.license_key || "";
-    const licTo = (data.is_pro_licensed ? data.licensed_to : "") || current.licensed_to || "Versi Trial (Gratis)";
+    // PC app is the master authority for licensing
+    const isPro = data.is_pro_licensed === true;
+    const licKey = isPro ? (data.license_key || "") : "";
+    const licTo = isPro ? (data.licensed_to || "Pengguna Pro") : "Versi Trial (Gratis)";
 
     const patch = {
       pc_connected: true,
@@ -265,6 +265,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "GET_STATE") {
       const synced = await syncWithPCFirewall();
       sendResponse(synced);
+      return;
+    }
+
+    // License Revocation / Reset to Trial
+    if (msg.type === "REVOKE_LICENSE" || msg.type === "RESET_LICENSE") {
+      await saveState({
+        is_pro_licensed: false,
+        license_key: "",
+        licensed_to: "Versi Trial (Gratis)"
+      });
+      sendResponse({ ok: true });
       return;
     }
 
