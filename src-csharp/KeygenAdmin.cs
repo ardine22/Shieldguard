@@ -150,6 +150,9 @@ namespace ShieldGuardKeygen
             btnSyncCloud.Click += (s, e) => {
                 btnSyncCloud.Enabled = false;
                 btnSyncCloud.Text = "⏳ Sinkron...";
+                LoadLocalData();
+                RefreshMemberList();
+                UpdateStats();
                 ThreadPool.QueueUserWorkItem(state => SyncCloudData(true));
             };
 
@@ -233,7 +236,9 @@ namespace ShieldGuardKeygen
                 btnNavGen.ForeColor = Color.FromArgb(203, 213, 225);
                 btnNavMembers.BackColor = Color.FromArgb(37, 99, 235);
                 btnNavMembers.ForeColor = Color.White;
+                LoadLocalData();
                 RefreshMemberList();
+                UpdateStats();
             }
         }
 
@@ -416,11 +421,29 @@ namespace ShieldGuardKeygen
             txtSearch.TextChanged += (s, e) => FilterMemberList(txtSearch.Text);
             topBar.Controls.Add(txtSearch);
 
+            Button btnRefresh = new Button {
+                Text = "🔄 Refresh",
+                Size = new Size(95, 30),
+                Location = new Point(505, 10),
+                BackColor = Color.FromArgb(30, 41, 59),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnRefresh.FlatAppearance.BorderSize = 0;
+            btnRefresh.Click += (s, e) => {
+                LoadLocalData();
+                RefreshMemberList();
+                UpdateStats();
+            };
+            topBar.Controls.Add(btnRefresh);
+
             lblStats = new Label {
                 Text = "👥 Total: 0 Member  |  🔒 Terkunci: 0 PC  |  ⏳ Belum Dipakai: 0",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(52, 211, 153),
-                Location = new Point(515, 14), AutoSize = true
+                Location = new Point(615, 14), AutoSize = true
             };
             topBar.Controls.Add(lblStats);
 
