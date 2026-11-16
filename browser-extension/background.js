@@ -166,6 +166,39 @@ async function syncWithPCFirewall() {
     return patch;
   } catch (e) {
     const current = await getState();
+
+    // In Mode Mandiri (PC App not running): Verify directly with Cloud License API
+    // If Admin deleted or reset this key on the server, automatically revoke PRO!
+    if (current.is_pro_licensed && current.license_key) {
+      try {
+        const cloudCtrl = new AbortController();
+        const cloudTimer = setTimeout(() => cloudCtrl.abort(), 2000);
+        const cloudRes = await fetch("http://70.151.150.190/api/license/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: current.license_key, hwid: "" }),
+          signal: cloudCtrl.signal
+        });
+        clearTimeout(cloudTimer);
+        if (cloudRes.ok) {
+          const cData = await cloudRes.json();
+          if (cData.valid === false) {
+            current.is_pro_licensed = false;
+            current.license_key = "";
+            current.licensed_to = "Versi Trial (Gratis)";
+            await saveState({
+              is_pro_licensed: false,
+              license_key: "",
+              licensed_to: "Versi Trial (Gratis)",
+              pc_connected: false
+            });
+            await updateDynamicFirewallRules(current.blocked_domains, current.firewall_enabled);
+            return { ...current, pc_connected: false };
+          }
+        }
+      } catch (_) {}
+    }
+
     await saveState({ pc_connected: false });
     await updateDynamicFirewallRules(current.blocked_domains, current.firewall_enabled);
     return { ...current, pc_connected: false };

@@ -209,28 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshPopup();
   });
 
-  // Revoke / Reset License to Trial
-  const btnRevoke = document.getElementById("btnRevokeLicense");
-  if (btnRevoke) {
-    btnRevoke.addEventListener("click", () => {
-      if (confirm("Apakah Anda yakin ingin mencabut lisensi PRO dari ekstensi ini dan kembali ke Versi Trial?")) {
-        chrome.runtime.sendMessage({ type: "REVOKE_LICENSE" }, () => {
-          chrome.storage.local.set(
-            {
-              is_pro_licensed: false,
-              license_key: "",
-              licensed_to: "Versi Trial (Gratis)"
-            },
-            () => {
-              alert("Lisensi telah dicabut. Ekstensi kembali ke Versi Trial.");
-              refreshPopup();
-            }
-          );
-        });
-      }
-    });
-  }
-
   // Buy License Link
   document.getElementById("btnBuyLicense").addEventListener("click", (e) => {
     e.preventDefault();
