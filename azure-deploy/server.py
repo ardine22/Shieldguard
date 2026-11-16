@@ -1,9 +1,15 @@
 import os
+import ssl
 import sys
+import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
 
-PORT = int(os.environ.get("PORT", 80))
+HTTP_PORT = int(os.environ.get("HTTP_PORT", 80))
+HTTPS_PORT = int(os.environ.get("HTTPS_PORT", 443))
+SSL_CERT = os.environ.get("SSL_CERT", "/etc/ssl/shieldguard.crt")
+SSL_KEY = os.environ.get("SSL_KEY", "/etc/ssl/shieldguard.key")
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 DOWNLOADS_DIR = os.path.join(PUBLIC_DIR, "downloads")
@@ -22,6 +28,18 @@ MIME_TYPES = {
     ".zip": "application/zip",
     ".txt": "text/plain; charset=utf-8"
 }
+
+
+class HTTPSRedirectHandler(SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
+    def do_GET(self):
+        host = self.headers.get("Host", "").split(":")[0] or "70.151.150.190"
+        target_url = f"https://{host}{self.path}"
+        self.send_response(301)
+        self.send_header("Location", target_url)
+        self.end_headers()
 
 
 class ShieldGuardDeployHandler(SimpleHTTPRequestHandler):
@@ -81,7 +99,7 @@ class ShieldGuardDeployHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(content)
                 return
 
-        # 3. Static Files (assets, icons, etc.)
+        # 3. Static Files
         local_path = os.path.join(PUBLIC_DIR, path.lstrip("/"))
         if os.path.isfile(local_path):
             ext = os.path.splitext(local_path)[1].lower()
@@ -98,19 +116,49 @@ class ShieldGuardDeployHandler(SimpleHTTPRequestHandler):
         self.send_error(404, "Halaman atau file tidak ditemukan.")
 
 
-def main():
-    print("=" * 60)
-    print("  ShieldGuard Pro Web Server (Azure VM Cloud Deploy)")
-    print(f"  Listening on: http://0.0.0.0:{PORT}")
-    print("=" * 60)
-    server = ThreadingHTTPServer(("0.0.0.0", PORT), ShieldGuardDeployHandler)
+def run_http_redirect():
     try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nServer dihentikan.")
-        sys.exit(0)
+        http_server = ThreadingHTTPServer(("0.0.0.0", HTTP_PORT), HTTPSRedirectHandler)
+        print(f"  HTTP Redirect running on port {HTTP_PORT} -> HTTPS")
+        http_server.serve_forever()
+    except Exception as e:
+        print(f"HTTP Redirect Server info: {e}")
+
+
+def main():
+    has_ssl = os.path.exists(SSL_CERT) and os.path.exists(SSL_KEY)
+
+    print("=" * 65)
+    print("  ShieldGuard Pro Web Server (Azure VM Cloud Deploy)")
+    if has_ssl:
+        print(f"  🔒 HTTPS AKTIF pada port: https://0.0.0.0:{HTTPS_PORT}")
+        print(f"  Sertifikat SSL: {SSL_CERT}")
+    else:
+        print(f"  HTTP AKTIF pada port: http://0.0.0.0:{HTTP_PORT}")
+    print("=" * 65)
+
+    if has_ssl:
+        # Start HTTP -> HTTPS redirect in background thread
+        t = threading.Thread(target=run_http_redirect, daemon=True)
+        t.start()
+
+        # Start HTTPS server
+        https_server = ThreadingHTTPServer(("0.0.0.0", HTTPS_PORT), ShieldGuardDeployHandler)
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(certfile=SSL_CERT, keyfile=SSL_KEY)
+        https_server.socket = ctx.wrap_socket(https_server.socket, server_side=True)
+        try:
+            https_server.serve_forever()
+        except KeyboardInterrupt:
+            sys.exit(0)
+    else:
+        # Fallback HTTP
+        http_server = ThreadingHTTPServer(("0.0.0.0", HTTP_PORT), ShieldGuardDeployHandler)
+        try:
+            http_server.serve_forever()
+        except KeyboardInterrupt:
+            sys.exit(0)
 
 
 if __name__ == "__main__":
     main()
-
