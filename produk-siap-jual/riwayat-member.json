@@ -3,11 +3,11 @@
     "key": "SGPRO-PRUH-60A0-4768",
     "buyer": "Pelanggan VIP",
     "phone": "-",
-    "bound_hwid": "",
-    "device_name": "-",
-    "status": "UNUSED",
+    "bound_hwid": "HWID-60C4674A-99D53DD3",
+    "device_name": "ARDINPC (PC Windows)",
+    "status": "ACTIVE",
     "created_at": "2026-11-16 20:36",
-    "activated_at": "-"
+    "activated_at": "2026-11-16 20:36:54"
   },
   {
     "key": "SGPRO-PRBG-9214-BA4C",
@@ -23,11 +23,11 @@
     "key": "SGPRO-PR3H-F930-394C",
     "buyer": "Jono",
     "phone": "-",
-    "bound_hwid": "",
-    "device_name": "-",
-    "status": "UNUSED",
+    "bound_hwid": "HWID-60C4674A-99D53DD3",
+    "device_name": "ARDINPC (PC Windows)",
+    "status": "ACTIVE",
     "created_at": "2026-11-16 20:57",
-    "activated_at": "-"
+    "activated_at": "2026-11-16 22:33"
   },
   {
     "key": "SGPRO-PR3J-2A83-D11A",

@@ -838,7 +838,94 @@ namespace ShieldGuardKeygen
                 catch {}
             }
 
+            // 3. Auto-detect local firewall activation from firewall_rules.json
+            string currentHwid = GetCurrentHwid();
+            string currentDevice = Environment.MachineName + " (PC Windows)";
+
+            string[] searchPaths = new string[] {
+                Path.Combine(baseDir, "data", "firewall_rules.json"),
+                Path.Combine(baseDir, "..", "produk-siap-jual", "data", "firewall_rules.json"),
+                Path.Combine(baseDir, "..", "pc-firewall", "data", "firewall_rules.json"),
+                Path.Combine(@"c:\Firewall\produk-siap-jual\data", "firewall_rules.json"),
+                Path.Combine(@"c:\Firewall\pc-firewall\data", "firewall_rules.json")
+            };
+
+            foreach (string p in searchPaths)
+            {
+                if (File.Exists(p))
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(p, Encoding.UTF8);
+                        // Check active license_key
+                        Match mKey = Regex.Match(content, "\"license_key\"\\s*:\\s*\"(SGPRO-[A-Z0-9-]{14})\"");
+                        Match mOwner = Regex.Match(content, "\"licensed_to\"\\s*:\\s*\"([^\"]*)\"");
+                        Match mPro = Regex.Match(content, "\"is_pro_licensed\"\\s*:\\s*true");
+
+                        if (mKey.Success && mPro.Success)
+                        {
+                            string activeKey = mKey.Groups[1].Value;
+                            string activeOwner = mOwner.Success ? mOwner.Groups[1].Value : "Pengguna Pro";
+
+                            var target = allMembers.Find(x => x.Key == activeKey);
+                            if (target != null)
+                            {
+                                target.BoundHwid = currentHwid;
+                                target.DeviceName = currentDevice;
+                                target.Status = "ACTIVE";
+                                if (string.IsNullOrEmpty(target.ActivatedAt) || target.ActivatedAt == "-")
+                                {
+                                    target.ActivatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                                }
+                            }
+                        }
+
+                        // Also scan logs for any other activated keys
+                        MatchCollection mcLogs = Regex.Matches(content, "\"timestamp\"\\s*:\\s*\"([^\"]*)\"[^}]*\"details\"\\s*:\\s*\"[^\"]*(SGPRO-[A-Z0-9-]{14})[^\"]*\"[^}]*\"action\"\\s*:\\s*\"ACTIVATED\"");
+                        foreach (Match ml in mcLogs)
+                        {
+                            string tstamp = ml.Groups[1].Value;
+                            string lkey = ml.Groups[2].Value;
+                            var target = allMembers.Find(x => x.Key == lkey);
+                            if (target != null && string.IsNullOrEmpty(target.BoundHwid))
+                            {
+                                target.BoundHwid = currentHwid;
+                                target.DeviceName = currentDevice;
+                                target.Status = "ACTIVE";
+                                target.ActivatedAt = tstamp;
+                            }
+                        }
+                    }
+                    catch {}
+                }
+            }
+
             SaveLocalData();
+        }
+
+        private static string GetCurrentHwid()
+        {
+            try
+            {
+                string guid = (string)Microsoft.Win32.Registry.GetValue(
+                    @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography",
+                    "MachineGuid", ""
+                );
+                if (!string.IsNullOrEmpty(guid))
+                {
+                    using (SHA256 sha = SHA256.Create())
+                    {
+                        byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes("HWID_SALT:" + guid));
+                        StringBuilder sb = new StringBuilder("HWID-");
+                        for (int i = 0; i < 4; i++) sb.Append(bytes[i].ToString("X2"));
+                        sb.Append("-");
+                        for (int i = 4; i < 8; i++) sb.Append(bytes[i].ToString("X2"));
+                        return sb.ToString();
+                    }
+                }
+            }
+            catch {}
+            return "HWID-" + Environment.MachineName.ToUpperInvariant();
         }
 
         private void SaveLocalData()
