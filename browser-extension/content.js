@@ -1,6 +1,17 @@
 (function () {
   if (window.location.href.startsWith("http://127.0.0.1:8765")) return;
 
+  function safeSendMessage(msg, callback) {
+    try {
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id) {
+        chrome.runtime.sendMessage(msg, (res) => {
+          if (chrome.runtime.lastError) return;
+          if (callback) callback(res);
+        });
+      }
+    } catch (_) {}
+  }
+
   let alreadyAlerted = false;
   const hostname = window.location.hostname.toLowerCase();
   const isSocialMedia = [
@@ -39,7 +50,7 @@
             [],
             true
           );
-          chrome.runtime.sendMessage({
+          safeSendMessage({
             type: "LOG_EVENT",
             payload: {
               level: "CRITICAL",
@@ -61,7 +72,7 @@
     const textSample = document.body.innerText || "";
     if (textSample.length < 30) return;
 
-    chrome.runtime.sendMessage(
+    safeSendMessage(
       {
         type: "SCAN_CONTENT",
         url: window.location.href,
@@ -69,7 +80,7 @@
         text: textSample.slice(0, 12000)
       },
       (res) => {
-        if (chrome.runtime.lastError || !res) return;
+        if (!res) return;
 
         // If in Trial mode and scam detected -> Show Trial alert with Upgrade prompt
         if (res.is_trial_warning) {
@@ -182,16 +193,18 @@
       else window.location.href = "https://www.google.com";
     };
     document.getElementById("sg-btn-block-domain").onclick = () => {
-      chrome.runtime.sendMessage(
+      safeSendMessage(
         {
           type: "BLOCK_DOMAIN",
           domain: hostname,
           reason: "Diblokir dari perisai deteksi konten Scam"
         },
         () => {
-          window.location.href = chrome.runtime.getURL(
-            `blocked.html?domain=${encodeURIComponent(hostname)}&reason=${encodeURIComponent(reason)}`
-          );
+          try {
+            window.location.href = chrome.runtime.getURL(
+              `blocked.html?domain=${encodeURIComponent(hostname)}&reason=${encodeURIComponent(reason)}`
+            );
+          } catch (_) {}
         }
       );
     };
