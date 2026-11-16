@@ -1,0 +1,42 @@
+﻿[
+  {
+    "key": "SGPRO-PRUH-60A0-4768",
+    "buyer": "Pelanggan VIP",
+    "phone": "-",
+    "bound_hwid": "",
+    "device_name": "-",
+    "status": "UNUSED",
+    "created_at": "2026-11-16 20:36",
+    "activated_at": "-"
+  },
+  {
+    "key": "SGPRO-PRBG-9214-BA4C",
+    "buyer": "Ardine",
+    "phone": "-",
+    "bound_hwid": "",
+    "device_name": "-",
+    "status": "UNUSED",
+    "created_at": "2026-11-16 20:52",
+    "activated_at": "-"
+  },
+  {
+    "key": "SGPRO-PR3H-F930-394C",
+    "buyer": "Jono",
+    "phone": "-",
+    "bound_hwid": "",
+    "device_name": "-",
+    "status": "UNUSED",
+    "created_at": "2026-11-16 20:57",
+    "activated_at": "-"
+  },
+  {
+    "key": "SGPRO-PR3J-2A83-D11A",
+    "buyer": "Rizal",
+    "phone": "-",
+    "bound_hwid": "",
+    "device_name": "-",
+    "status": "UNUSED",
+    "created_at": "2026-11-16 22:14",
+    "activated_at": "-"
+  }
+]
