@@ -442,9 +442,21 @@ namespace ShieldGuardKeygen
             };
             btnRefresh.FlatAppearance.BorderSize = 0;
             btnRefresh.Click += (s, e) => {
+                btnRefresh.Enabled = false;
+                btnRefresh.Text = "⏳ Refresh...";
+                CheckLocalActivations();
                 LoadLocalData();
                 RefreshMemberList();
                 UpdateStats();
+                ThreadPool.QueueUserWorkItem(state => {
+                    SyncCloudData(true);
+                    try {
+                        this.Invoke((Action)(() => {
+                            btnRefresh.Enabled = true;
+                            btnRefresh.Text = "🔄 Refresh";
+                        }));
+                    } catch {}
+                });
             };
             topBar.Controls.Add(btnRefresh);
 
