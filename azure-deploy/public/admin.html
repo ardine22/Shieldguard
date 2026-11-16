@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShieldGuard Pro — Admin Member & License Monitor</title>
+  <style>
+    :root {
+      --bg: #070b14;
+      --card: #111827;
+      --border: #1e293b;
+      --primary: #2563eb;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px 16px; min-height: 100vh; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* AUTH LOGIN OVERLAY */
+    #loginOverlay {
+      position: fixed; inset: 0; background: rgba(7, 11, 20, 0.95);
+      backdrop-filter: blur(8px); z-index: 99999;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+      padding: 36px 32px; max-width: 420px; width: 100%; text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+    }
+    .login-box h2 { font-size: 20px; margin: 12px 0 6px; }
+    .login-box p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .login-box input {
+      width: 100%; background: #0b0f19; border: 1px solid #374151; color: #fff;
+      padding: 12px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; outline: none;
+      text-align: center; letter-spacing: 2px;
+    }
+    .login-box button {
+      width: 100%; background: var(--primary); color: #fff; border: none;
+      padding: 12px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+      border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo-badge {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #10b981);
+      display: flex; align-items: center; justify-content: center; font-size: 24px;
+    }
+    .brand h1 { font-size: 20px; font-weight: 800; }
+    .brand p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    /* STATS ROW */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
+    }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .stat-val { font-size: 26px; font-weight: 800; margin-top: 6px; }
+
+    /* ACTION BAR & CONTROLS */
+    .controls-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px 20px; margin-bottom: 24px; display: flex; gap: 14px; flex-wrap: wrap;
+      justify-content: space-between; align-items: center;
+    }
+    .search-input {
+      flex: 1; min-width: 280px; background: #0b0f19; border: 1px solid #374151; color: #fff;
+      padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; border: none;
+      padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-emerald { background: #10b981; color: #fff; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-outline { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; }
+    .btn-sm { padding: 5px 9px; font-size: 11px; border-radius: 5px; }
+
+    /* TABLE */
+    .table-container {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      overflow-x: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th {
+      background: #1e293b; padding: 14px 16px; font-size: 11.5px; font-weight: 700;
+      color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    td { padding: 14px 16px; border-bottom: 1px solid #1f2937; vertical-align: middle; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    .member-name { font-weight: 700; color: #f8fafc; font-size: 14px; }
+    .member-phone { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .key-badge {
+      font-family: Consolas, monospace; font-weight: 700; color: #34d399;
+      background: rgba(16,185,129,0.12); padding: 5px 8px; border-radius: 6px;
+      display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(16,185,129,0.25);
+    }
+    .hwid-badge {
+      font-family: Consolas, monospace; font-size: 11.5px; color: #93c5fd;
+      background: #1e293b; padding: 4px 8px; border-radius: 6px; display: inline-block;
+    }
+    .status-pill {
+      font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .status-pill.active { background: rgba(16,185,129,0.2); color: #34d399; }
+    .status-pill.pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
+
+    /* CREATE KEY MODAL */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(5,8,16,0.85); backdrop-filter: blur(5px);
+      z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-box {
+      background: #111827; border: 1px solid #374151; border-radius: 16px;
+      max-width: 480px; width: 100%; padding: 24px;
+    }
+    .modal-box h3 { font-size: 17px; margin-bottom: 16px; }
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; }
+    .form-row input {
+      width: 100%; background: #0b0f19; border: 1px solid #374151; color: #fff;
+      padding: 9px 12px; border-radius: 7px; font-size: 13px; outline: none;
+    }
+
+    @media (max-width: 800px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN MODAL -->
+  <div id="loginOverlay">
+    <div class="login-box">
+      <div style="font-size:42px;">🔐</div>
+      <h2>ShieldGuard Admin Portal</h2>
+      <p>Masukkan Kunci Akses Rahasia Administrator untuk memantau member & Serial Key.</p>
+      <input type="password" id="adminSecretInput" placeholder="Password Admin (Default: SG_ADMIN_2026)" />
+      <button onclick="attemptLogin()">Buka Dashboard Admin</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo-badge">🛡️</div>
+        <div>
+          <h1>ShieldGuard Admin — Member & License Monitor</h1>
+          <p>Pemantau Member Resmi, Pencarian Serial Key Hilang, & Pengatur Kunci Perangkat (HWID)</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-emerald" onclick="openCreateModal()">+ Terbitkan Lisensi Baru</button>
+        <button class="btn btn-outline" onclick="logoutAdmin()">🚪 Logout</button>
+      </div>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Member Terdaftar</div>
+        <div class="stat-val" id="statTotalMembers" style="color:#60a5fa;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Perangkat Aktif (HWID Locked)</div>
+        <div class="stat-val" id="statActiveDevices" style="color:#34d399;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Lisensi Belum Terikat (Tersedia)</div>
+        <div class="stat-val" id="statUnusedKeys" style="color:#fbbf24;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Server Cloud Azure</div>
+        <div class="stat-val" style="font-size:16px;color:#34d399;margin-top:10px;">🟢 LIVE 24/7</div>
+      </div>
+    </div>
+
+    <div class="controls-card">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Member: ketik Nama, No. WhatsApp, atau Serial Key..." oninput="filterTable()" />
+      <button class="btn btn-outline" onclick="loadMembers()">🔄 Segarkan Data</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Member / Pembeli</th>
+            <th>Serial Key Resmi</th>
+            <th>Perangkat Terikat (HWID Lock)</th>
+            <th>Status</th>
+            <th>Tanggal Aktivasi</th>
+            <th>Aksi Penjual</th>
+          </tr>
+        </thead>
+        <tbody id="memberTableBody">
+          <tr>
+            <td colspan="6" style="text-align:center;padding:30px;color:var(--muted);">Memuat data member...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL CREATE NEW KEY -->
+  <div id="createKeyModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-box">
+      <h3>➕ Terbitkan Serial Key Baru untuk Member</h3>
+      <div class="form-row">
+        <label>Nama Pembeli:</label>
+        <input type="text" id="newBuyerName" placeholder="Contoh: Budi Santoso" />
+      </div>
+      <div class="form-row">
+        <label>No. WhatsApp / Email Pembeli:</label>
+        <input type="text" id="newBuyerPhone" placeholder="Contoh: 08123456789" />
+      </div>
+      <div class="form-row">
+        <label>Kode Segmen (4 Huruf/Angka Bebas):</label>
+        <input type="text" id="newKeyPrefix" placeholder="Contoh: VIP1 atau PRO9" maxlength="4" value="VIP1" />
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+        <button class="btn btn-outline" onclick="closeCreateModal()">Batal</button>
+        <button class="btn btn-emerald" onclick="submitCreateKey()">⚡ Generate & Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSecret = localStorage.getItem("sg_admin_secret") || "";
+    let allMembers = [];
+
+    function attemptLogin() {
+      const val = document.getElementById("adminSecretInput").value.trim();
+      if (!val) {
+        alert("Masukkan password admin.");
+        return;
+      }
+      currentSecret = val;
+      localStorage.setItem("sg_admin_secret", val);
+      loadMembers();
+    }
+
+    function logoutAdmin() {
+      localStorage.removeItem("sg_admin_secret");
+      location.reload();
+    }
+
+    async function loadMembers() {
+      try {
+        const res = await fetch(`/api/license/admin-view?secret=${encodeURIComponent(currentSecret)}`);
+        if (res.status === 403) {
+          document.getElementById("loginOverlay").style.display = "flex";
+          alert("Kunci akses admin salah!");
+          return;
+        }
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById("loginOverlay").style.display = "none";
+          allMembers = Object.values(data.licenses || {});
+          updateStats();
+          renderTable(allMembers);
+        }
+      } catch (err) {
+        alert("Gagal terhubung ke server Azure: " + err.message);
+      }
+    }
+
+    function updateStats() {
+      document.getElementById("statTotalMembers").textContent = allMembers.length;
+      const locked = allMembers.filter(m => m.bound_hwid).length;
+      document.getElementById("statActiveDevices").textContent = locked;
+      document.getElementById("statUnusedKeys").textContent = allMembers.length - locked;
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById("memberTableBody");
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--muted);">Belum ada member atau data tidak ditemukan.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(m => {
+        const hasHwid = !!m.bound_hwid;
+        const statusHtml = hasHwid 
+          ? `<span class="status-pill active">Terkunci (1 Device)</span>`
+          : `<span class="status-pill pending">Belum Dipakai</span>`;
+        
+        return `
+          <tr>
+            <td>
+              <div class="member-name">${escapeHtml(m.buyer || "Pengguna Pro")}</div>
+              <div class="member-phone">📱 ${escapeHtml(m.phone || m.whatsapp || "-")}</div>
+            </td>
+            <td>
+              <span class="key-badge">
+                <span>${escapeHtml(m.key)}</span>
+                <button class="btn btn-sm btn-outline" onclick="copyKey('${escapeHtml(m.key)}')">📋 Salin</button>
+              </span>
+            </td>
+            <td>
+              <div><span class="hwid-badge">${escapeHtml(m.bound_hwid || "Belum Terikat ke PC")}</span></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">💻 ${escapeHtml(m.device_name || "-")}</div>
+            </td>
+            <td>${statusHtml}</td>
+            <td style="color:var(--muted);font-size:12px;">${escapeHtml(m.activated_at || m.created_at || "-")}</td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                ${hasHwid ? `<button class="btn btn-sm btn-outline" style="color:#fbbf24;" onclick="resetHwid('${escapeHtml(m.key)}')">🔄 Reset Device</button>` : ''}
+                <button class="btn btn-sm btn-danger" onclick="deleteLicense('${escapeHtml(m.key)}')">🗑️ Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterTable() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = allMembers.filter(m => {
+        return (m.buyer || "").toLowerCase().includes(query) ||
+               (m.key || "").toLowerCase().includes(query) ||
+               (m.phone || "").toLowerCase().includes(query) ||
+               (m.bound_hwid || "").toLowerCase().includes(query);
+      });
+      renderTable(filtered);
+    }
+
+    function copyKey(key) {
+      navigator.clipboard.writeText(key).then(() => {
+        alert(`✅ Serial Key berhasil disalin:\n\n${key}\n\nKirimkan kode ini ke member yang membutuhkan!`);
+      });
+    }
+
+    async function resetHwid(key) {
+      if (!confirm(`Apakah Anda yakin ingin me-reset kunci perangkat untuk Serial Key:\n${key}?\n\nMember akan bisa mengaktifkan kodenya di laptop/komputer baru.`)) {
+        return;
+      }
+      const res = await fetch("/api/license/admin-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: currentSecret, key })
+      });
+      const data = await res.json();
+      alert(data.message || "Device berhasil di-reset!");
+      loadMembers();
+    }
+
+    async function deleteLicense(key) {
+      if (!confirm(`Hapus permanen lisensi ${key}? Member tidak akan bisa menggunakan kode ini lagi.`)) {
+        return;
+      }
+      const res = await fetch("/api/license/admin-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: currentSecret, key })
+      });
+      const data = await res.json();
+      alert(data.message || "Lisensi berhasil dihapus.");
+      loadMembers();
+    }
+
+    function openCreateModal() {
+      document.getElementById("createKeyModal").style.display = "flex";
+    }
+
+    function closeCreateModal() {
+      document.getElementById("createKeyModal").style.display = "none";
+    }
+
+    async function submitCreateKey() {
+      const name = document.getElementById("newBuyerName").value.trim() || "Member Baru";
+      const phone = document.getElementById("newBuyerPhone").value.trim() || "-";
+      const prefix = document.getElementById("newKeyPrefix").value.trim().toUpperCase() || "VIP1";
+
+      const res = await fetch("/api/license/admin-create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: currentSecret, buyer: name, phone: phone, prefix: prefix })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        closeCreateModal();
+        alert(`🎉 Serial Key Baru Berhasil Dibuat:\n\n${data.key}\n\nPembeli: ${name}\n\nSerial Key otomatis tersimpan di Cloud Server Azure!`);
+        loadMembers();
+      } else {
+        alert(data.message || "Gagal membuat Serial Key.");
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    // Auto-login on load if secret stored
+    if (currentSecret) {
+      loadMembers();
+    } else {
+      document.getElementById("loginOverlay").style.display = "flex";
+    }
+  </script>
+</body>
+</html>
