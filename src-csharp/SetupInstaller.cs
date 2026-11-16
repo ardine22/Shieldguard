@@ -146,14 +146,28 @@ namespace ShieldGuardSetup
                 if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
                 string tempZip = Path.Combine(Path.GetTempPath(), "sg_payload_" + Guid.NewGuid().ToString("N") + ".zip");
-                using (Stream resStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("ShieldGuardPayload.zip"))
+                Stream resStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("ShieldGuardPayload.zip");
+                if (resStream == null)
+                    resStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip");
+                if (resStream == null)
                 {
-                    if (resStream == null)
-                        throw new Exception("Paket instalasi internal tidak ditemukan.");
-                    using (FileStream fs = new FileStream(tempZip, FileMode.Create, FileAccess.Write))
+                    foreach (string resName in Assembly.GetExecutingAssembly().GetManifestResourceNames())
                     {
-                        resStream.CopyTo(fs);
+                        if (resName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                        {
+                            resStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resName);
+                            break;
+                        }
                     }
+                }
+
+                if (resStream == null)
+                    throw new Exception("Paket instalasi internal tidak ditemukan.");
+
+                using (resStream)
+                using (FileStream fs = new FileStream(tempZip, FileMode.Create, FileAccess.Write))
+                {
+                    resStream.CopyTo(fs);
                 }
 
                 lblStatus.Text = "Mengekstrak aplikasi Firewall & Ekstensi Chrome/Edge...";
