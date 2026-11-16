@@ -1,0 +1,335 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  width: 380px;
+  background: #0b0f19;
+  color: #f3f4f6;
+  padding: 14px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.badge-pill {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+}
+
+.badge-pill.trial {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-pill.pro {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.subtitle {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.power-btn {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.power-btn.on { background: #10b981; color: #ffffff; }
+.power-btn.off { background: #ef4444; color: #ffffff; }
+
+/* LICENSE CARD */
+.license-box {
+  margin-top: 10px;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #374151;
+  background: #111827;
+}
+
+.license-box.trial-mode {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, #181d27 0%, #1e2430 100%);
+}
+
+.license-box.pro-mode {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #0d211a 0%, #112822 100%);
+}
+
+.lic-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.lic-desc {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 3px 0 8px;
+  line-height: 1.35;
+}
+
+.lic-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lic-inputs input {
+  background: #0b0f19;
+  border: 1px solid #374151;
+  color: #fff;
+  padding: 6px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+#licKeyInput {
+  font-family: Consolas, monospace;
+  font-weight: bold;
+  color: #34d399;
+}
+
+.btn-activate {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 7px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.btn-activate:hover { opacity: 0.9; }
+
+.lic-buy-row {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.buy-link {
+  font-size: 11px;
+  color: #60a5fa;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pro-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pro-star {
+  font-size: 22px;
+}
+
+.pro-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #34d399;
+}
+
+.pro-sub {
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.pro-key-view {
+  font-size: 10px;
+  font-family: Consolas, monospace;
+  color: #94a3b8;
+  margin-top: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.current-tab-box {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.current-tab-box .label {
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.current-tab-box .domain-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #60a5fa;
+  margin: 3px 0 8px;
+  word-break: break-all;
+}
+
+.tab-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  flex: 1;
+  border: none;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+}
+
+.btn.danger { background: #ef4444; }
+.btn.primary { background: #2563eb; }
+.btn.sm { flex: 0 0 auto; padding: 7px 12px; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.stat {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  padding: 7px;
+  text-align: center;
+}
+
+.stat .val {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.stat .lbl {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.section {
+  margin-top: 10px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+
+.input-group {
+  display: flex;
+  gap: 6px;
+}
+
+.input-group input {
+  flex: 1;
+  background: #0b0f19;
+  border: 1px solid #374151;
+  color: #fff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.trial-hint {
+  font-size: 10px;
+  color: #f59e0b;
+  margin-top: 5px;
+}
+
+.switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.pro-tag {
+  background: #2563eb;
+  color: #fff;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.domain-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.tag {
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag .del {
+  color: #f87171;
+  cursor: pointer;
+  font-weight: bold;
+}

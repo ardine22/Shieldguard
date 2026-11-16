@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>ShieldGuard Pro Firewall</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="header">
+    <div class="brand">
+      <img src="icons/icon48.png" width="30" height="30" alt="ShieldGuard" />
+      <div>
+        <div class="brand-row">
+          <span class="title">ShieldGuard</span>
+          <span id="badgeLicense" class="badge-pill trial">TRIAL</span>
+        </div>
+        <div id="pcSyncStatus" class="subtitle">Memeriksa PC Firewall...</div>
+      </div>
+    </div>
+    <button id="toggleMainBtn" class="power-btn on">AKTIF</button>
+  </div>
+
+  <!-- LICENSE ACTIVATION / STATUS CARD -->
+  <div id="licenseCard" class="license-box trial-mode">
+    <div id="trialSection">
+      <div class="lic-title">⚡ Buka ShieldGuard PRO Edition</div>
+      <div class="lic-desc">Dapatkan deteksi scam real-time, pelindung anti-cookie stealer, dan blokir domain tanpa batas.</div>
+      <div class="lic-inputs">
+        <input type="text" id="licNameInput" placeholder="Nama / Email Pembeli" />
+        <input type="text" id="licKeyInput" placeholder="SGPRO-XXXX-XXXX-XXXX" />
+        <button id="btnActivateLicense" class="btn-activate">🔑 Aktifkan Serial Key</button>
+      </div>
+      <div class="lic-buy-row">
+        <a id="btnBuyLicense" href="#" class="buy-link">🛒 Beli Lisensi Pro (Rp 49.000 / Lifetime)</a>
+      </div>
+    </div>
+
+    <div id="proSection" style="display:none;">
+      <div class="pro-header">
+        <span class="pro-star">🌟</span>
+        <div>
+          <div class="pro-title">SHIELDGUARD PRO LIFETIME</div>
+          <div class="pro-sub">Terdaftar resmi a/n: <b id="proOwnerName">-</b></div>
+        </div>
+      </div>
+      <div class="pro-key-view">Key: <span id="proKeyView">-</span></div>
+    </div>
+  </div>
+
+  <div class="current-tab-box">
+    <div class="label">Situs Tab Saat Ini</div>
+    <div id="currentDomain" class="domain-name">-</div>
+    <div class="tab-actions">
+      <button id="btnBlockCurrent" class="btn danger">⛔ Blokir Domain Ini</button>
+      <button id="btnOpenPCDash" class="btn primary">🖥️ Dashboard PC</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat">
+      <div id="statBlocked" class="val" style="color:#f87171;">0</div>
+      <div class="lbl">Diblokir</div>
+    </div>
+    <div class="stat">
+      <div id="statScam" class="val" style="color:#fbbf24;">0</div>
+      <div class="lbl">Scam Kripto</div>
+    </div>
+    <div class="stat">
+      <div id="statDomains" class="val" style="color:#60a5fa;">0</div>
+      <div class="lbl">Aturan Domain</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Tambah Blokir Domain Manual</div>
+    <div class="input-group">
+      <input type="text" id="inputDomain" placeholder="misal: woukox.com" />
+      <button id="btnAddDomain" class="btn danger sm">+ Blokir</button>
+    </div>
+    <div id="trialLimitNotice" class="trial-hint">Versi Trial: Maksimal 3 domain kustom. Aktifkan Pro untuk Unlimited.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Modul Proteksi Real-Time</div>
+    <label class="switch-row">
+      <span>Deteksi Scam Kripto (MrBeast / $2500) <b class="pro-tag">PRO</b></span>
+      <input type="checkbox" id="chkScam" checked />
+    </label>
+    <label class="switch-row">
+      <span>Pelindung Cookie & Anti-Self-XSS <b class="pro-tag">PRO</b></span>
+      <input type="checkbox" id="chkCookie" checked />
+    </label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Daftar Domain Diblokir (Klik ✕ untuk hapus)</div>
+    <div id="blockedList" class="domain-tags"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

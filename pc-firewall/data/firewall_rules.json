@@ -1,0 +1,120 @@
+{
+  "firewall_enabled": true,
+  "scam_protection_enabled": true,
+  "cookie_guard_enabled": true,
+  "hosts_sync_enabled": true,
+  "blocked_domains": [
+    "woukox.com",
+    "www.woukox.com",
+    "mrbeast-casino.com",
+    "beast-crypto.com",
+    "elon-giveaway.org",
+    "stake-bonus-claim.com",
+    "crypto-boom-bonus.com",
+    "usdt-instant-claim.com",
+    "free-2500-usdt.com",
+    "discord-nitro-free.ru",
+    "instagram-verify-badge.com"
+  ],
+  "whitelisted_domains": [
+    "google.com",
+    "www.google.com",
+    "youtube.com",
+    "www.youtube.com",
+    "instagram.com",
+    "www.instagram.com",
+    "facebook.com",
+    "www.facebook.com",
+    "x.com",
+    "twitter.com",
+    "github.com",
+    "microsoft.com",
+    "localhost",
+    "127.0.0.1"
+  ],
+  "blocked_ips": [
+    "185.220.101.1",
+    "45.142.214.99"
+  ],
+  "blocked_apps": [],
+  "scam_keywords": [
+    "launch of my very own crypto casino",
+    "giving away $2,500 to everyone who registers",
+    "enter the special promo code: boom",
+    "enter the promo code: boom",
+    "withdraw the bonus instantly",
+    "your withdrawal of $2500.00 was successfully",
+    "receive your $2,500 bonus",
+    "woukox.com",
+    "deposit to verify your wallet",
+    "activate your wallet for withdrawal",
+    "mrbeast crypto casino",
+    "elon musk crypto giveaway",
+    "send 0.05 btc to receive 0.1 btc"
+  ],
+  "suspicious_domain_patterns": [
+    "woukox",
+    "beast.*casino",
+    "crypto.*giveaway",
+    "claim.*usdt",
+    "bonus.*2500",
+    "free.*nitro.*discord",
+    "insta.*login.*verify"
+  ],
+  "stats": {
+    "total_requests_checked": 1,
+    "threats_blocked": 2,
+    "scam_pages_detected": 1,
+    "network_ips_blocked": 0
+  },
+  "logs": [
+    {
+      "timestamp": "2026-11-16 20:23:29",
+      "level": "INFO",
+      "category": "CONFIG_CHANGE",
+      "target": "cookie_guard_enabled",
+      "details": "Pengaturan cookie_guard_enabled diubah menjadi True",
+      "action": "CONFIG"
+    },
+    {
+      "timestamp": "2026-11-16 20:23:29",
+      "level": "INFO",
+      "category": "CONFIG_CHANGE",
+      "target": "cookie_guard_enabled",
+      "details": "Pengaturan cookie_guard_enabled diubah menjadi False",
+      "action": "CONFIG"
+    },
+    {
+      "timestamp": "2026-11-16 20:22:35",
+      "level": "INFO",
+      "category": "CONFIG_CHANGE",
+      "target": "firewall_enabled",
+      "details": "Pengaturan firewall_enabled diubah menjadi True",
+      "action": "CONFIG"
+    },
+    {
+      "timestamp": "2026-11-16 20:22:34",
+      "level": "INFO",
+      "category": "CONFIG_CHANGE",
+      "target": "firewall_enabled",
+      "details": "Pengaturan firewall_enabled diubah menjadi False",
+      "action": "CONFIG"
+    },
+    {
+      "timestamp": "2026-11-16 20:11:09",
+      "level": "CRITICAL",
+      "category": "SCAM_SITE",
+      "target": "unknown-site.xyz",
+      "details": "Konten Scam Kripto/Phishing terdeteksi (Skor: 100/100): enter the special promo code: boom, woukox.com, ola-heuristik: Catut Nama Figur Publik + Bonus Kasino Kripto ($2,500/Promo)",
+      "action": "BLOCKED"
+    },
+    {
+      "timestamp": "2026-11-16 20:11:09",
+      "level": "CRITICAL",
+      "category": "DOMAIN_BLOCK",
+      "target": "woukox.com",
+      "details": "Akses ke situs terlarang diblokir: https://woukox.com/register",
+      "action": "BLOCKED"
+    }
+  ]
+}

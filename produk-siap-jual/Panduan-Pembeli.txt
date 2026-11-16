@@ -1,0 +1,62 @@
+========================================================================
+   PANDUAN INSTALASI & AKTIVASI — SHIELDGUARD PRO SECURITY SUITE (v1.0)
+   Untuk Windows 10/11 + Google Chrome & Microsoft Edge
+========================================================================
+
+Terima kasih telah mengunduh ShieldGuard Pro Firewall & Anti-Scam Suite!
+
+------------------------------------------------------------------------
+1. CARA INSTAL APLIKASI DI PC WINDOWS
+------------------------------------------------------------------------
+- Cara Otomatis (Installer):
+  Klik 2x pada file "ShieldGuard-Setup-v1.0.exe", lalu klik tombol
+  "INSTAL SEKARANG". Shortcut aplikasi akan otomatis muncul di Desktop.
+
+- Cara Langsung (Portable):
+  Anda juga dapat langsung mengklik 2x file "ShieldGuardFirewall.exe"
+  tanpa perlu menginstal Python atau aplikasi tambahan apa pun.
+
+- Tips Mode Admin:
+  Klik kanan pada "ShieldGuardFirewall.exe" -> pilih "Run as administrator"
+  jika Anda ingin mengaktifkan pemblokiran level kernel Windows Defender
+  Firewall (netsh) dan sinkronisasi otomatis file Windows Hosts.
+
+------------------------------------------------------------------------
+2. CARA MEMASANG EKSTENSI DI GOOGLE CHROME & MICROSOFT EDGE
+------------------------------------------------------------------------
+A. Google Chrome:
+   1. Buka Chrome, ketik: chrome://extensions lalu tekan Enter.
+   2. Aktifkan "Developer mode" (Mode pengembang) di pojok kanan atas.
+   3. Klik tombol "Load unpacked" (Muat yang belum dikemas).
+   4. Pilih folder "browser-extension" yang ada di dalam paket.
+
+B. Microsoft Edge:
+   1. Buka Edge, ketik: edge://extensions lalu tekan Enter.
+   2. Aktifkan "Developer mode" (Mode pengembang) di panel sebelah kiri.
+   3. Klik tombol "Load unpacked" (Muat yang belum dikemas).
+   4. Pilih folder "browser-extension".
+
+------------------------------------------------------------------------
+3. CARA AKTIVASI SERIAL KEY PRO (SGPRO-XXXX-XXXX-XXXX)
+------------------------------------------------------------------------
+Serial Key resmi Anda dapat digunakan untuk mengaktifkan Aplikasi PC
+maupun Ekstensi Browser:
+
+A. Aktivasi di Aplikasi Desktop PC:
+   1. Buka ShieldGuard Firewall di PC Anda.
+   2. Klik tab ke-5: "[🔑 Aktivasi Lisensi Pro & Toko]".
+   3. Masukkan Nama Anda dan Serial Key Pro (contoh: SGPRO-XXXX-XXXX-XXXX).
+   4. Klik "AKTIFKAN LISENSI PRO SEKARANG".
+   *Catatan: Jika PC Firewall sudah aktif Pro, Ekstensi Chrome & Edge
+   akan otomatis ikut teraktivasi Pro saat terhubung!
+
+B. Aktivasi Langsung di Ekstensi Browser Chrome / Edge:
+   1. Klik ikon perisai ShieldGuard di toolbar browser Chrome / Edge Anda.
+   2. Pada kartu lisensi di bagian atas popup, masukkan:
+      - Nama Pembeli
+      - Serial Key Pro (SGPRO-XXXX-XXXX-XXXX)
+   3. Klik tombol "🔑 Aktifkan Serial Key".
+   4. Status akan langsung berubah menjadi "🌟 SHIELDGUARD PRO LIFETIME",
+      membuka seluruh fitur deteksi scam kripto, anti-stealer, dan
+      blokir domain tanpa batas!
+========================================================================
