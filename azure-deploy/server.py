@@ -416,30 +416,31 @@ def main():
     print("=" * 65)
     print("  ShieldGuard Pro Web & Cloud License Server (1-Device Lock)")
     print(f"  Cloud License API: /api/license/activate")
+    print(f"  🌐 HTTP AKTIF pada port: http://0.0.0.0:{HTTP_PORT}")
     if has_ssl:
         print(f"  🔒 HTTPS AKTIF pada port: https://0.0.0.0:{HTTPS_PORT}")
-    else:
-        print(f"  HTTP AKTIF pada port: http://0.0.0.0:{HTTP_PORT}")
     print("=" * 65)
 
     if has_ssl:
-        t = threading.Thread(target=run_http_redirect, daemon=True)
+        def run_https():
+            try:
+                https_server = ThreadingHTTPServer(("0.0.0.0", HTTPS_PORT), ShieldGuardDeployHandler)
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+                ctx.load_cert_chain(certfile=SSL_CERT, keyfile=SSL_KEY)
+                https_server.socket = ctx.wrap_socket(https_server.socket, server_side=True)
+                https_server.serve_forever()
+            except Exception as e:
+                print(f"HTTPS Server note: {e}")
+
+        t = threading.Thread(target=run_https, daemon=True)
         t.start()
 
-        https_server = ThreadingHTTPServer(("0.0.0.0", HTTPS_PORT), ShieldGuardDeployHandler)
-        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        ctx.load_cert_chain(certfile=SSL_CERT, keyfile=SSL_KEY)
-        https_server.socket = ctx.wrap_socket(https_server.socket, server_side=True)
-        try:
-            https_server.serve_forever()
-        except KeyboardInterrupt:
-            sys.exit(0)
-    else:
-        http_server = ThreadingHTTPServer(("0.0.0.0", HTTP_PORT), ShieldGuardDeployHandler)
-        try:
-            http_server.serve_forever()
-        except KeyboardInterrupt:
-            sys.exit(0)
+    # Selalu layani website langsung di HTTP (Port 80) tanpa redirect paksa
+    http_server = ThreadingHTTPServer(("0.0.0.0", HTTP_PORT), ShieldGuardDeployHandler)
+    try:
+        http_server.serve_forever()
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 
 if __name__ == "__main__":
