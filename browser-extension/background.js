@@ -5,6 +5,7 @@ const DEFAULT_STATE = {
   scam_protection_enabled: true,
   cookie_guard_enabled: true,
   pc_connected: false,
+  browser_device_id: "",
   is_pro_licensed: false,
   license_key: "",
   licensed_to: "Versi Trial (Gratis)",
@@ -325,6 +326,44 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         });
         return;
       }
+
+      // 1. Cloud 1-Device Lock Check & Registration (Direct to Azure Server)
+      let cloudHwid = "";
+      try {
+        const cState = await getState();
+        if (!cState.browser_device_id) {
+          cloudHwid = "BROWSER-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+          await saveState({ browser_device_id: cloudHwid });
+        } else {
+          cloudHwid = cState.browser_device_id;
+        }
+
+        const cloudCtrl = new AbortController();
+        const cloudTimer = setTimeout(() => cloudCtrl.abort(), 3500);
+        const cloudRes = await fetch("http://70.151.150.190/api/license/activate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key: key,
+            buyer: owner,
+            hwid: cloudHwid,
+            device_name: "Chrome Browser Extension"
+          }),
+          signal: cloudCtrl.signal
+        });
+        clearTimeout(cloudTimer);
+
+        if (cloudRes.ok) {
+          const cData = await cloudRes.json();
+          if (cData.ok === false && cData.status === "DEVICE_MISMATCH") {
+            sendResponse({
+              ok: false,
+              message: cData.message || "❌ GAGAL: Serial Key ini sudah terikat pada perangkat lain!"
+            });
+            return;
+          }
+        }
+      } catch (_) {}
 
       await saveState({
         is_pro_licensed: true,
