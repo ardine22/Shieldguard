@@ -72,12 +72,13 @@ namespace ShieldGuardKeygen
         public KeygenForm()
         {
             this.Text = "ShieldGuard Pro — Admin & Member Control Center";
-            this.Size = new Size(1060, 720);
-            this.MinimumSize = new Size(980, 640);
+            this.Size = new Size(1100, 750);
+            this.MinimumSize = new Size(1000, 680);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.FromArgb(11, 15, 25);
             this.ForeColor = Color.FromArgb(243, 244, 246);
             this.Font = new Font("Segoe UI", 9.5f);
+            this.MaximizeBox = true;
 
             baseDir = AppDomain.CurrentDomain.BaseDirectory;
             historyTxtPath = Path.Combine(baseDir, "riwayat-lisensi-terjual.txt");
@@ -98,10 +99,19 @@ namespace ShieldGuardKeygen
 
         private void BuildUI()
         {
-            // 1. TOP HEADER (Height: 70)
+            // 1. TOP MASTER CONTAINER (Holds Header & Nav Bar in fixed order)
+            Panel topMaster = new Panel {
+                Dock = DockStyle.Top,
+                Height = 125,
+                BackColor = Color.FromArgb(17, 24, 39)
+            };
+
+            // 1A. Header Panel (Height: 74)
             Panel header = new Panel {
-                Dock = DockStyle.Top, Height = 74,
-                BackColor = Color.FromArgb(17, 24, 39), Padding = new Padding(18, 10, 18, 10)
+                Dock = DockStyle.Top,
+                Height = 74,
+                BackColor = Color.FromArgb(17, 24, 39),
+                Padding = new Padding(18, 10, 18, 10)
             };
 
             Label lblTitle = new Label {
@@ -122,14 +132,14 @@ namespace ShieldGuardKeygen
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(251, 191, 36),
                 AutoSize = true, Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(780, 16)
+                Location = new Point(800, 16)
             };
 
             btnSyncCloud = new Button {
                 Text = "🔄 Sinkron Cloud",
                 Size = new Size(130, 30),
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(900, 34),
+                Location = new Point(920, 34),
                 BackColor = Color.FromArgb(37, 99, 235),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -147,17 +157,18 @@ namespace ShieldGuardKeygen
             header.Controls.Add(lblSub);
             header.Controls.Add(lblCloudStatus);
             header.Controls.Add(btnSyncCloud);
-            this.Controls.Add(header);
 
-            // 2. NAV BAR (Height: 45)
+            // 1B. Nav Bar Panel (Height: 51)
             Panel navBar = new Panel {
-                Dock = DockStyle.Top, Height = 45,
-                BackColor = Color.FromArgb(15, 23, 42), Padding = new Padding(18, 5, 18, 5)
+                Dock = DockStyle.Bottom,
+                Height = 51,
+                BackColor = Color.FromArgb(15, 23, 42),
+                Padding = new Padding(18, 8, 18, 8)
             };
 
             btnNavGen = new Button {
                 Text = "⚡ Buat Lisensi Baru (Generator)",
-                Size = new Size(240, 34), Location = new Point(18, 5),
+                Size = new Size(240, 34), Location = new Point(18, 8),
                 BackColor = Color.FromArgb(16, 185, 129), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 Cursor = Cursors.Hand
@@ -167,7 +178,7 @@ namespace ShieldGuardKeygen
 
             btnNavMembers = new Button {
                 Text = "👥 Data Member & Monitor Perangkat (0)",
-                Size = new Size(280, 34), Location = new Point(268, 5),
+                Size = new Size(300, 34), Location = new Point(270, 8),
                 BackColor = Color.FromArgb(30, 41, 59), ForeColor = Color.FromArgb(203, 213, 225),
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 Cursor = Cursors.Hand
@@ -177,15 +188,20 @@ namespace ShieldGuardKeygen
 
             navBar.Controls.Add(btnNavGen);
             navBar.Controls.Add(btnNavMembers);
-            this.Controls.Add(navBar);
 
-            // 3. MAIN CONTENT PANELS
+            // Assemble Top Master
+            topMaster.Controls.Add(navBar);
+            topMaster.Controls.Add(header);
+            this.Controls.Add(topMaster);
+
+            // 2. MAIN CONTENT HOST (Fills below Top Master)
             Panel contentHost = new Panel {
                 Dock = DockStyle.Fill,
                 BackColor = Color.FromArgb(11, 15, 25),
-                Padding = new Padding(18)
+                Padding = new Padding(16, 12, 16, 12)
             };
             this.Controls.Add(contentHost);
+            contentHost.BringToFront();
 
             // Panel A: Generator
             panelGen = BuildGeneratorPanel();
@@ -226,18 +242,22 @@ namespace ShieldGuardKeygen
         // =========================================================================
         private Panel BuildGeneratorPanel()
         {
-            Panel p = new Panel { AutoScroll = true, BackColor = Color.FromArgb(11, 15, 25) };
+            Panel p = new Panel {
+                AutoScroll = true,
+                BackColor = Color.FromArgb(11, 15, 25),
+                Dock = DockStyle.Fill,
+                Padding = new Padding(12)
+            };
 
-            int y = 10;
             // Row 1: Inputs
             Label l1 = new Label {
                 Text = "Nama / Email Pembeli:", Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                Location = new Point(10, y), AutoSize = true
+                Location = new Point(10, 10), AutoSize = true
             };
             p.Controls.Add(l1);
 
             txtBuyer = new TextBox {
-                Location = new Point(10, y + 24), Width = 380,
+                Location = new Point(10, 36), Width = 360,
                 Font = new Font("Segoe UI", 10.5f),
                 BackColor = Color.FromArgb(17, 24, 39), ForeColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle, Text = "Pelanggan VIP"
@@ -246,12 +266,12 @@ namespace ShieldGuardKeygen
 
             Label lPhone = new Label {
                 Text = "No. WhatsApp / HP Pembeli:", Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                Location = new Point(410, y), AutoSize = true
+                Location = new Point(390, 10), AutoSize = true
             };
             p.Controls.Add(lPhone);
 
             txtPhone = new TextBox {
-                Location = new Point(410, y + 24), Width = 260,
+                Location = new Point(390, 36), Width = 240,
                 Font = new Font("Segoe UI", 10.5f),
                 BackColor = Color.FromArgb(17, 24, 39), ForeColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle, Text = "08123456789"
@@ -260,12 +280,12 @@ namespace ShieldGuardKeygen
 
             Label l2 = new Label {
                 Text = "Kode Segmen (4 Char):", Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                Location = new Point(690, y), AutoSize = true
+                Location = new Point(650, 10), AutoSize = true
             };
             p.Controls.Add(l2);
 
             txtPrefix = new TextBox {
-                Location = new Point(690, y + 24), Width = 110, MaxLength = 4,
+                Location = new Point(650, 36), Width = 110, MaxLength = 4,
                 Font = new Font("Consolas", 11.5f, FontStyle.Bold),
                 BackColor = Color.FromArgb(17, 24, 39), ForeColor = Color.FromArgb(96, 165, 250),
                 BorderStyle = BorderStyle.FixedSingle, Text = "PRO1", TextAlign = HorizontalAlignment.Center
@@ -273,7 +293,7 @@ namespace ShieldGuardKeygen
             p.Controls.Add(txtPrefix);
 
             Button btnRandom = new Button {
-                Text = "🎲 Acak", Location = new Point(810, y + 22), Size = new Size(80, 28),
+                Text = "🎲 Acak", Location = new Point(770, 34), Size = new Size(80, 30),
                 BackColor = Color.FromArgb(30, 41, 59), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
                 Cursor = Cursors.Hand
@@ -287,11 +307,10 @@ namespace ShieldGuardKeygen
             };
             p.Controls.Add(btnRandom);
 
-            y += 66;
-            // Generate Button
+            // Row 2: Generate Button
             Button btnGen = new Button {
                 Text = "⚡ GENERATE SERIAL KEY BARU & SALIN KE CLIPBOARD",
-                Location = new Point(10, y), Size = new Size(880, 44),
+                Location = new Point(10, 80), Size = new Size(840, 46),
                 BackColor = Color.FromArgb(16, 185, 129), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 11f, FontStyle.Bold),
                 Cursor = Cursors.Hand
@@ -300,17 +319,16 @@ namespace ShieldGuardKeygen
             btnGen.Click += OnGenerateClick;
             p.Controls.Add(btnGen);
 
-            y += 56;
-            // Output Key
+            // Row 3: Output Key
             Label l3 = new Label {
                 Text = "Serial Key Hasil Generate (Siap Dikirim ke Pembeli):",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                Location = new Point(10, y), AutoSize = true
+                Location = new Point(10, 140), AutoSize = true
             };
             p.Controls.Add(l3);
 
             txtOutputKey = new TextBox {
-                Location = new Point(10, y + 24), Width = 880, ReadOnly = true,
+                Location = new Point(10, 166), Width = 840, ReadOnly = true,
                 Font = new Font("Consolas", 18f, FontStyle.Bold),
                 BackColor = Color.FromArgb(30, 41, 59), ForeColor = Color.FromArgb(52, 211, 153),
                 BorderStyle = BorderStyle.FixedSingle, TextAlign = HorizontalAlignment.Center,
@@ -318,17 +336,16 @@ namespace ShieldGuardKeygen
             };
             p.Controls.Add(txtOutputKey);
 
-            y += 74;
-            // WhatsApp Message Template
+            // Row 4: WhatsApp Message Template
             Label lWa = new Label {
                 Text = "💬 Template Pesan WhatsApp Siap Kirim ke Pembeli:",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                Location = new Point(10, y), AutoSize = true
+                Location = new Point(10, 226), AutoSize = true
             };
             p.Controls.Add(lWa);
 
             Button btnCopyWa = new Button {
-                Text = "📋 Salin Pesan WA Lengkap", Location = new Point(700, y - 4), Size = new Size(190, 26),
+                Text = "📋 Salin Pesan WA Lengkap", Location = new Point(660, 222), Size = new Size(190, 28),
                 BackColor = Color.FromArgb(37, 99, 235), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
                 Cursor = Cursors.Hand
@@ -343,7 +360,7 @@ namespace ShieldGuardKeygen
             p.Controls.Add(btnCopyWa);
 
             txtWaTemplate = new TextBox {
-                Location = new Point(10, y + 24), Width = 880, Height = 90,
+                Location = new Point(10, 254), Width = 840, Height = 90,
                 Multiline = true, ReadOnly = true,
                 Font = new Font("Segoe UI", 9.5f),
                 BackColor = Color.FromArgb(17, 24, 39), ForeColor = Color.FromArgb(209, 213, 219),
@@ -352,17 +369,16 @@ namespace ShieldGuardKeygen
             };
             p.Controls.Add(txtWaTemplate);
 
-            y += 124;
-            // Quick History
+            // Row 5: Quick History
             Label l4 = new Label {
                 Text = "📜 Riwayat Serial Key yang Baru Dibuat:",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                Location = new Point(10, y), AutoSize = true
+                Location = new Point(10, 360), AutoSize = true
             };
             p.Controls.Add(l4);
 
             lstQuickHistory = new ListBox {
-                Location = new Point(10, y + 24), Width = 880, Height = 140,
+                Location = new Point(10, 386), Width = 840, Height = 140,
                 BackColor = Color.FromArgb(17, 24, 39), ForeColor = Color.FromArgb(209, 213, 219),
                 Font = new Font("Consolas", 9.5f), BorderStyle = BorderStyle.FixedSingle
             };
@@ -381,7 +397,7 @@ namespace ShieldGuardKeygen
             // Row 1: Search & Stats Bar
             Panel topBar = new Panel {
                 Dock = DockStyle.Top, Height = 50,
-                BackColor = Color.FromArgb(17, 24, 39), Padding = new Padding(10, 8, 10, 8)
+                BackColor = Color.FromArgb(17, 24, 39), Padding = new Padding(12, 8, 12, 8)
             };
 
             Label lSearch = new Label {
@@ -392,7 +408,7 @@ namespace ShieldGuardKeygen
             topBar.Controls.Add(lSearch);
 
             txtSearch = new TextBox {
-                Location = new Point(130, 11), Width = 360,
+                Location = new Point(135, 11), Width = 360,
                 Font = new Font("Segoe UI", 10f),
                 BackColor = Color.FromArgb(11, 15, 25), ForeColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
@@ -404,10 +420,9 @@ namespace ShieldGuardKeygen
                 Text = "👥 Total: 0 Member  |  🔒 Terkunci: 0 PC  |  ⏳ Belum Dipakai: 0",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(52, 211, 153),
-                Location = new Point(510, 14), AutoSize = true
+                Location = new Point(515, 14), AutoSize = true
             };
             topBar.Controls.Add(lblStats);
-            p.Controls.Add(topBar);
 
             // Row 2: Bottom Action Bar
             Panel botBar = new Panel {
@@ -472,9 +487,7 @@ namespace ShieldGuardKeygen
             };
             botBar.Controls.Add(btnOpenFolder);
 
-            p.Controls.Add(botBar);
-
-            // Row 3: ListView Table
+            // Row 3: ListView Table (Docks to Fill between topBar and botBar)
             lvMembers = new ListView {
                 Dock = DockStyle.Fill,
                 View = View.Details,
@@ -495,7 +508,12 @@ namespace ShieldGuardKeygen
             lvMembers.Columns.Add("Terdaftar / Aktif", 140);
 
             lvMembers.DoubleClick += OnCopySelectedKey;
+
+            // Add in proper docking order
             p.Controls.Add(lvMembers);
+            p.Controls.Add(topBar);
+            p.Controls.Add(botBar);
+            lvMembers.BringToFront();
 
             return p;
         }
