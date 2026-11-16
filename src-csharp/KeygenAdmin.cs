@@ -93,13 +93,10 @@ namespace ShieldGuardKeygen
             RefreshMemberList();
             UpdateStats();
 
-            // Real-Time Auto-Refresh Timer (Every 3 seconds)
+            // Real-Time Cloud Sync Timer (Every 3 seconds)
             System.Windows.Forms.Timer realTimeTimer = new System.Windows.Forms.Timer();
             realTimeTimer.Interval = 3000;
             realTimeTimer.Tick += (s, e) => {
-                LoadLocalData();
-                RefreshMemberList();
-                UpdateStats();
                 ThreadPool.QueueUserWorkItem(state => SyncCloudData(false));
             };
             realTimeTimer.Start();
@@ -707,6 +704,7 @@ namespace ShieldGuardKeygen
                 m.BoundHwid = "";
                 m.DeviceName = "-";
                 m.Status = "UNBOUND";
+                ClearLocalFirewallIfMatches(m.Key);
                 SaveLocalData();
                 RefreshMemberList();
                 UpdateStats();
@@ -743,25 +741,79 @@ namespace ShieldGuardKeygen
 
         private void OnDeleteSelectedMember(object sender, EventArgs e)
         {
-            if (lvMembers.SelectedItems.Count == 0) return;
+            if (lvMembers.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Pilih salah satu member yang ingin dihapus.", "Pilih Member", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             MemberItem m = lvMembers.SelectedItems[0].Tag as MemberItem;
             if (m == null) return;
 
             DialogResult dr = MessageBox.Show(
                 "Hapus permanen lisensi berikut dari database?\n\nKey: " + m.Key + "\nPembeli: " + m.Buyer,
-                "Konfirmasi Hapus",
+                "Konfirmasi Hapus Lisensi",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning
             );
 
             if (dr == DialogResult.Yes)
             {
+                string deletedKey = m.Key;
                 allMembers.Remove(m);
+                RemoveFromHistoryTxt(deletedKey);
+                ClearLocalFirewallIfMatches(deletedKey);
                 SaveLocalData();
                 RefreshMemberList();
                 UpdateStats();
 
-                ThreadPool.QueueUserWorkItem(state => DeleteKeyOnCloud(m.Key));
+                ThreadPool.QueueUserWorkItem(state => DeleteKeyOnCloud(deletedKey));
+                MessageBox.Show("✅ Lisensi " + deletedKey + " berhasil dihapus dari database.", "Hapus Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void RemoveFromHistoryTxt(string key)
+        {
+            try
+            {
+                if (!File.Exists(historyTxtPath)) return;
+                string[] lines = File.ReadAllLines(historyTxtPath, Encoding.UTF8);
+                List<string> kept = new List<string>();
+                foreach (string line in lines)
+                {
+                    if (!line.Contains(key)) kept.Add(line);
+                }
+                File.WriteAllLines(historyTxtPath, kept.ToArray(), Encoding.UTF8);
+            }
+            catch {}
+        }
+
+        private void ClearLocalFirewallIfMatches(string key)
+        {
+            string[] searchPaths = new string[] {
+                Path.Combine(baseDir, "data", "firewall_rules.json"),
+                Path.Combine(baseDir, "..", "produk-siap-jual", "data", "firewall_rules.json"),
+                Path.Combine(baseDir, "..", "pc-firewall", "data", "firewall_rules.json"),
+                Path.Combine(@"c:\Firewall\produk-siap-jual\data", "firewall_rules.json"),
+                Path.Combine(@"c:\Firewall\pc-firewall\data", "firewall_rules.json")
+            };
+
+            foreach (string p in searchPaths)
+            {
+                if (File.Exists(p))
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(p, Encoding.UTF8);
+                        if (content.Contains(key))
+                        {
+                            string updated = Regex.Replace(content, "\"is_pro_licensed\"\\s*:\\s*true", "\"is_pro_licensed\": false");
+                            updated = Regex.Replace(updated, "\"license_key\"\\s*:\\s*\"" + Regex.Escape(key) + "\"", "\"license_key\": \"\"");
+                            updated = Regex.Replace(updated, "\"licensed_to\"\\s*:\\s*\"[^\"]*\"", "\"licensed_to\": \"\"");
+                            File.WriteAllText(p, updated, Encoding.UTF8);
+                        }
+                    }
+                    catch {}
+                }
             }
         }
 
@@ -920,7 +972,7 @@ namespace ShieldGuardKeygen
                             string activeOwner = mOwner.Success ? mOwner.Groups[1].Value : "Pengguna Pro";
 
                             var target = allMembers.Find(x => x.Key == activeKey);
-                            if (target != null && (string.IsNullOrEmpty(target.BoundHwid) || target.BoundHwid == currentHwid))
+                            if (target != null && target.Status != "UNBOUND" && target.Status != "UNUSED" && (string.IsNullOrEmpty(target.BoundHwid) || target.BoundHwid == currentHwid))
                             {
                                 target.BoundHwid = currentHwid;
                                 target.DeviceName = currentDevice;
@@ -939,7 +991,7 @@ namespace ShieldGuardKeygen
                             string tstamp = ml.Groups[1].Value;
                             string lkey = ml.Groups[2].Value;
                             var target = allMembers.Find(x => x.Key == lkey);
-                            if (target != null && string.IsNullOrEmpty(target.BoundHwid))
+                            if (target != null && target.Status != "UNBOUND" && target.Status != "UNUSED" && string.IsNullOrEmpty(target.BoundHwid))
                             {
                                 target.BoundHwid = currentHwid;
                                 target.DeviceName = currentDevice;
