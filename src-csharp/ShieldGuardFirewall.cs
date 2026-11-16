@@ -97,6 +97,7 @@ namespace ShieldGuardApp
 
             BuildUI();
             StartHttpServer();
+            StartLicenseWatchdog();
             RefreshUIData();
             RefreshConnections();
 
@@ -1230,6 +1231,70 @@ namespace ShieldGuardApp
             });
             serverThread.IsBackground = true;
             serverThread.Start();
+        }
+
+        // ===================== REAL-TIME LICENSE REVOCATION WATCHDOG =====================
+        private void StartLicenseWatchdog()
+        {
+            Thread watchdog = new Thread(delegate() {
+                while (running)
+                {
+                    try
+                    {
+                        Thread.Sleep(10000); // Check every 10 seconds
+                        if (!config.is_pro_licensed || string.IsNullOrEmpty(config.license_key)) continue;
+
+                        string key = config.license_key;
+                        string hwid = string.IsNullOrEmpty(config.bound_hwid) ? GetHardwareId() : config.bound_hwid;
+
+                        string url = "http://70.151.150.190/api/license/verify";
+                        HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+                        req.Method = "POST";
+                        req.ContentType = "application/json; charset=utf-8";
+                        req.Timeout = 4000;
+                        string json = string.Format("{{\"key\":\"{0}\",\"hwid\":\"{1}\"}}", key, hwid);
+                        byte[] body = Encoding.UTF8.GetBytes(json);
+                        req.ContentLength = body.Length;
+                        using (Stream s = req.GetRequestStream()) { s.Write(body, 0, body.Length); }
+
+                        using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+                        using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+                        {
+                            string respText = sr.ReadToEnd();
+                            if (respText.Contains("\"valid\": false") || respText.Contains("\"valid\":false"))
+                            {
+                                lock (syncLock)
+                                {
+                                    config.is_pro_licensed = false;
+                                    config.license_key = "";
+                                    config.licensed_to = "Versi Trial";
+                                    config.bound_hwid = "";
+                                }
+                                SaveConfig();
+                                try
+                                {
+                                    this.Invoke((Action)(() => {
+                                        RefreshUIData();
+                                        MessageBox.Show(
+                                            "⚠️ Pemberitahuan Lisensi:\n\nLisensi ShieldGuard PRO untuk komputer ini telah di-reset atau dicabut oleh Admin.\n\nAplikasi Anda telah kembali ke Versi Trial.",
+                                            "Lisensi Dicabut",
+                                            MessageBoxButtons.OK,
+                                            MessageBoxIcon.Warning
+                                        );
+                                    }));
+                                }
+                                catch {}
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Offline or server temporarily unreachable
+                    }
+                }
+            });
+            watchdog.IsBackground = true;
+            watchdog.Start();
         }
 
         private string FindProjectRoot()
