@@ -93,10 +93,11 @@ namespace ShieldGuardKeygen
             RefreshMemberList();
             UpdateStats();
 
-            // Real-Time Cloud Sync Timer (Every 3 seconds)
+            // Real-Time Local & Cloud Sync Timer (Every 3 seconds)
             System.Windows.Forms.Timer realTimeTimer = new System.Windows.Forms.Timer();
             realTimeTimer.Interval = 3000;
             realTimeTimer.Tick += (s, e) => {
+                CheckLocalActivations();
                 ThreadPool.QueueUserWorkItem(state => SyncCloudData(false));
             };
             realTimeTimer.Start();
@@ -789,7 +790,9 @@ namespace ShieldGuardKeygen
 
         private void ClearLocalFirewallIfMatches(string key)
         {
+            string appDataRules = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ShieldGuard Firewall", "data", "firewall_rules.json");
             string[] searchPaths = new string[] {
+                appDataRules,
                 Path.Combine(baseDir, "data", "firewall_rules.json"),
                 Path.Combine(baseDir, "..", "produk-siap-jual", "data", "firewall_rules.json"),
                 Path.Combine(baseDir, "..", "pc-firewall", "data", "firewall_rules.json"),
@@ -943,25 +946,33 @@ namespace ShieldGuardKeygen
             }
 
             // 3. Auto-detect local firewall activation from firewall_rules.json
-            string currentHwid = GetCurrentHwid();
-            string currentDevice = Environment.MachineName + " (PC Windows)";
+            CheckLocalActivations();
+            SaveLocalData();
+        }
 
-            string[] searchPaths = new string[] {
-                Path.Combine(baseDir, "data", "firewall_rules.json"),
-                Path.Combine(baseDir, "..", "produk-siap-jual", "data", "firewall_rules.json"),
-                Path.Combine(baseDir, "..", "pc-firewall", "data", "firewall_rules.json"),
-                Path.Combine(@"c:\Firewall\produk-siap-jual\data", "firewall_rules.json"),
-                Path.Combine(@"c:\Firewall\pc-firewall\data", "firewall_rules.json")
-            };
-
-            foreach (string p in searchPaths)
+        private void CheckLocalActivations()
+        {
+            try
             {
-                if (File.Exists(p))
+                string currentHwid = GetCurrentHwid();
+                string currentDevice = Environment.MachineName + " (PC Windows)";
+                string appDataRules = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ShieldGuard Firewall", "data", "firewall_rules.json");
+
+                string[] searchPaths = new string[] {
+                    appDataRules,
+                    Path.Combine(baseDir, "data", "firewall_rules.json"),
+                    Path.Combine(baseDir, "..", "produk-siap-jual", "data", "firewall_rules.json"),
+                    Path.Combine(baseDir, "..", "pc-firewall", "data", "firewall_rules.json"),
+                    Path.Combine(@"c:\Firewall\produk-siap-jual\data", "firewall_rules.json"),
+                    Path.Combine(@"c:\Firewall\pc-firewall\data", "firewall_rules.json")
+                };
+
+                bool changed = false;
+                foreach (string p in searchPaths)
                 {
-                    try
+                    if (File.Exists(p))
                     {
                         string content = File.ReadAllText(p, Encoding.UTF8);
-                        // Check active license_key
                         Match mKey = Regex.Match(content, "\"license_key\"\\s*:\\s*\"(SGPRO-[A-Z0-9-]{14})\"");
                         Match mOwner = Regex.Match(content, "\"licensed_to\"\\s*:\\s*\"([^\"]*)\"");
                         Match mPro = Regex.Match(content, "\"is_pro_licensed\"\\s*:\\s*true");
@@ -972,14 +983,22 @@ namespace ShieldGuardKeygen
                             string activeOwner = mOwner.Success ? mOwner.Groups[1].Value : "Pengguna Pro";
 
                             var target = allMembers.Find(x => x.Key == activeKey);
-                            if (target != null && target.Status != "UNBOUND" && target.Status != "UNUSED" && (string.IsNullOrEmpty(target.BoundHwid) || target.BoundHwid == currentHwid))
+                            if (target != null && target.Status != "UNBOUND")
                             {
-                                target.BoundHwid = currentHwid;
-                                target.DeviceName = currentDevice;
-                                target.Status = "ACTIVE";
-                                if (string.IsNullOrEmpty(target.ActivatedAt) || target.ActivatedAt == "-")
+                                if (string.IsNullOrEmpty(target.BoundHwid) || target.Status == "UNUSED")
                                 {
-                                    target.ActivatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                                    target.BoundHwid = currentHwid;
+                                    target.DeviceName = currentDevice;
+                                    target.Status = "ACTIVE";
+                                    if (string.IsNullOrEmpty(target.ActivatedAt) || target.ActivatedAt == "-")
+                                    {
+                                        target.ActivatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                                    }
+                                    if (!string.IsNullOrEmpty(activeOwner) && activeOwner != "Pengguna Pro" && (target.Buyer == "Pelanggan VIP" || target.Buyer == "Ardine"))
+                                    {
+                                        target.Buyer = activeOwner;
+                                    }
+                                    changed = true;
                                 }
                             }
                         }
@@ -991,20 +1010,26 @@ namespace ShieldGuardKeygen
                             string tstamp = ml.Groups[1].Value;
                             string lkey = ml.Groups[2].Value;
                             var target = allMembers.Find(x => x.Key == lkey);
-                            if (target != null && target.Status != "UNBOUND" && target.Status != "UNUSED" && string.IsNullOrEmpty(target.BoundHwid))
+                            if (target != null && target.Status != "UNBOUND" && (string.IsNullOrEmpty(target.BoundHwid) || target.Status == "UNUSED"))
                             {
                                 target.BoundHwid = currentHwid;
                                 target.DeviceName = currentDevice;
                                 target.Status = "ACTIVE";
                                 target.ActivatedAt = tstamp;
+                                changed = true;
                             }
                         }
                     }
-                    catch {}
+                }
+
+                if (changed)
+                {
+                    SaveLocalData();
+                    RefreshMemberList();
+                    UpdateStats();
                 }
             }
-
-            SaveLocalData();
+            catch {}
         }
 
         private static string GetCurrentHwid()
