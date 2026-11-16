@@ -105,6 +105,73 @@
     .price-list { list-style: none; margin: 16px 0 24px; font-size: 13px; }
     .price-list li { margin-bottom: 9px; color: #cbd5e1; }
 
+    /* CHECKOUT MODAL STYLES */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(5, 8, 16, 0.85);
+      backdrop-filter: blur(6px); z-index: 99999;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-card {
+      background: #111827; border: 1px solid #374151; border-radius: 18px;
+      max-width: 500px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      overflow: hidden; animation: popIn 0.2s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 18px 24px; background: #1a2234; border-bottom: 1px solid #2d3748;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { display: flex; align-items: center; gap: 12px; }
+    .modal-close {
+      color: #9ca3af; font-size: 20px; font-weight: bold; cursor: pointer; padding: 4px;
+    }
+    .modal-close:hover { color: #fff; }
+    .modal-body { padding: 22px 24px; }
+    .summary-box {
+      background: #0b0f19; border: 1px solid #1f2937; border-radius: 12px;
+      padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%; background: #0b0f19; border: 1px solid #374151; color: #fff;
+      padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none;
+    }
+    .form-group input:focus { border-color: #2563eb; }
+    .qris-card {
+      background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+      padding: 16px; text-align: center; margin: 18px 0;
+    }
+    .qris-badge {
+      font-size: 11px; font-weight: 800; color: #34d399; letter-spacing: 0.5px; margin-bottom: 12px;
+    }
+    .qr-container {
+      background: #ffffff; padding: 12px; border-radius: 12px;
+      display: inline-block; margin-bottom: 12px;
+    }
+    .qr-container img { width: 180px; height: 180px; display: block; }
+    .gopay-details {
+      font-size: 13px; color: #e2e8f0; background: #0f172a; padding: 10px 14px; border-radius: 8px;
+    }
+    .btn-copy {
+      background: #334155; color: #fff; border: none; padding: 3px 8px; border-radius: 5px;
+      font-size: 11px; cursor: pointer; margin-left: 6px;
+    }
+    .btn-whatsapp {
+      width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff; justify-content: center; padding: 14px; font-size: 14px; border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(16,185,129,0.3);
+    }
+    .modal-footer-hint {
+      font-size: 11px; color: #94a3b8; text-align: center; margin-top: 14px; line-height: 1.4;
+    }
+
     footer {
       border-top: 1px solid var(--border); text-align: center;
       padding: 28px; color: var(--muted); font-size: 13px;
@@ -195,7 +262,7 @@
 
   <section class="pricing" id="harga">
     <h2>Pilihan Paket Lisensi ShieldGuard</h2>
-    <p>Unduh gratis untuk mencoba, dan aktifkan **Serial Key Pro (`SGPRO-XXXX-XXXX-XXXX`)** langsung di dalam Ekstensi Browser atau Aplikasi Desktop.</p>
+    <p>Unduh gratis untuk mencoba, dan aktifkan **Serial Key Pro (`SGPRO-XXXX-XXXX-XXXX`)** yang terkunci aman untuk 1 perangkat Anda.</p>
 
     <div class="price-grid">
       <!-- Tier 1: Trial -->
@@ -226,15 +293,15 @@
           <p style="color:var(--muted);font-size:12.5px;">Lisensi Serial Key aktif di Google Chrome & Microsoft Edge.</p>
           <ul class="price-list">
             <li>✅ <b>Aktivasi Langsung</b> di Popup Ekstensi Browser</li>
+            <li>✅ <b>1 Lisensi Terkunci 1 Perangkat</b> (Aman dari pembajakan)</li>
             <li>✅ <b>Deteksi Heuristik Penuh</b> Scam Kripto & Phishing</li>
             <li>✅ <b>Pelindung Cookie & Token Akun</b> (Anti-Self-XSS)</li>
             <li>✅ <b>Unlimited</b> Blokir Domain Kustom</li>
-            <li>✅ Peringatan Scam di Feed/DM Instagram & Discord</li>
             <li>⚪ Integrasi Kernel Windows Firewall: Tidak Termasuk</li>
           </ul>
         </div>
-        <button onclick="alert('Hubungi penjual untuk membeli Serial Key SGPRO Ekstensi Browser (Rp 49.000), lalu klik ikon ekstensi di browser dan masukkan kodenya!')" class="btn btn-primary" style="width:100%;justify-content:center;">
-          🔑 Beli Lisensi Ekstensi (Rp 49k)
+        <button onclick="openCheckoutModal('Ekstensi PRO Edition (Chrome & Edge)', '49.000')" class="btn btn-primary" style="width:100%;justify-content:center;">
+          💳 Beli via QRIS / GoPay (Rp 49k)
         </button>
       </div>
 
@@ -247,22 +314,130 @@
           <p style="color:var(--muted);font-size:12.5px;">Paket lengkap: Aplikasi Desktop PC Windows + Ekstensi Browser PRO.</p>
           <ul class="price-list">
             <li>✅ <b>1 Serial Key untuk Semua:</b> PC App + Chrome & Edge</li>
+            <li>✅ <b>1 Lisensi Terkunci 1 Perangkat</b> (Cloud HWID Lock)</li>
             <li>✅ <b>Aplikasi Desktop Windows (.exe)</b> Standalone</li>
             <li>✅ <b>Windows Defender Firewall Netsh</b> (Blokir IP & Aplikasi)</li>
             <li>✅ <b>Sinkronisasi Otomatis</b> File Hosts & DNS Cache</li>
             <li>✅ <b>Pemindai Malware Infostealer</b> Real-Time di PC</li>
-            <li>✅ <b>Semua Fitur Ekstensi PRO</b> Termasuk</li>
           </ul>
         </div>
-        <button onclick="alert('Hubungi penjual untuk membeli Lisensi Suite Lengkap (Rp 149.000), lalu masukkan Serial Key di aplikasi PC atau ekstensi browser!')" class="btn btn-emerald" style="width:100%;justify-content:center;">
-          ⭐ Beli Lisensi Suite Lengkap (Rp 149k)
+        <button onclick="openCheckoutModal('ShieldGuard SUITE PRO (PC + Ekstensi)', '149.000')" class="btn btn-emerald" style="width:100%;justify-content:center;">
+          💳 Beli via QRIS / GoPay (Rp 149k)
         </button>
       </div>
     </div>
   </section>
 
+  <!-- POPUP CHECKOUT MODAL QRIS & GOPAY -->
+  <div id="checkoutModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span style="font-size:22px;">💳</span>
+          <div>
+            <h3 style="font-size:16px;">Checkout QRIS / GoPay</h3>
+            <p style="color:var(--muted);font-size:11px;">Aktivasi Resmi ShieldGuard Pro (1 Device Lock)</p>
+          </div>
+        </div>
+        <span class="modal-close" onclick="closeCheckoutModal()">✕</span>
+      </div>
+
+      <div class="modal-body">
+        <div class="summary-box">
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;">Paket:</div>
+            <div id="checkoutPkgName" style="font-size:15px;font-weight:700;color:#60a5fa;">ShieldGuard Ekstensi PRO</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;">Total Tagihan:</div>
+            <div id="checkoutPkgPrice" style="font-size:18px;font-weight:800;color:#34d399;">Rp 49.000</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Nama Lengkap Anda:</label>
+          <input type="text" id="buyerName" placeholder="Contoh: Budi Santoso" />
+        </div>
+
+        <div class="form-group">
+          <label>Nomor WhatsApp Anda (Untuk Pengiriman Serial Key):</label>
+          <input type="text" id="buyerPhone" placeholder="Contoh: 081234567890" />
+        </div>
+
+        <div class="qris-card">
+          <div class="qris-badge">📱 SCAN QRIS DENGAN GOPAY / DANA / OVO / BCA / SHOPEE</div>
+          <div class="qr-container">
+            <img id="qrisImg" src="" alt="QR Code QRIS / GoPay" />
+          </div>
+          <div class="gopay-details">
+            <div>Transfer GoPay / DANA: <b id="gopayNumber">081334373033</b> <button type="button" class="btn-copy" onclick="copyGopay()">📋 Salin</button></div>
+            <div style="color:var(--muted);font-size:11px;margin-top:2px;">Atas Nama: <b>Ardine (ShieldGuard Pro)</b></div>
+          </div>
+        </div>
+
+        <button class="btn btn-whatsapp" onclick="confirmPaymentWA()">
+          💬 Konfirmasi Pembayaran & Ambil Serial Key (WhatsApp)
+        </button>
+
+        <p class="modal-footer-hint">
+          🔒 Serial Key resmi akan langsung dikirimkan ke WhatsApp Anda setelah transfer terkonfirmasi, dan otomatis terikat aman ke 1 perangkat komputer Anda.
+        </p>
+      </div>
+    </div>
+  </div>
+
   <footer>
     &copy; 2026 ShieldGuard Security Suite. Kompatibel dengan Windows 10/11, Google Chrome, dan Microsoft Edge.
   </footer>
+
+  <script>
+    const SELLER_WA = "6281334373033";
+    let selectedPackage = "ShieldGuard SUITE PRO";
+    let selectedPrice = "149.000";
+
+    function openCheckoutModal(pkgName, price) {
+      selectedPackage = pkgName;
+      selectedPrice = price;
+      document.getElementById("checkoutPkgName").textContent = pkgName;
+      document.getElementById("checkoutPkgPrice").textContent = "Rp " + price;
+      
+      // Generate clean QR Code pointing to GoPay payment payload
+      const qrData = encodeURIComponent(`gopay://transfer?phone=081334373033&amount=${price.replace('.', '')}&notes=${encodeURIComponent(pkgName)}`);
+      document.getElementById("qrisImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}`;
+      
+      document.getElementById("checkoutModal").style.display = "flex";
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById("checkoutModal").style.display = "none";
+    }
+
+    function copyGopay() {
+      navigator.clipboard.writeText("081334373033").then(() => {
+        alert("Nomor GoPay 081334373033 berhasil disalin!");
+      });
+    }
+
+    function confirmPaymentWA() {
+      const name = document.getElementById("buyerName").value.trim() || "Pelanggan";
+      const phone = document.getElementById("buyerPhone").value.trim() || "-";
+      
+      const msg = encodeURIComponent(
+        `Halo Admin ShieldGuard, saya ingin konfirmasi pembayaran via GoPay/QRIS:\n\n` +
+        `📦 Paket: ${selectedPackage}\n` +
+        `💰 Total: Rp ${selectedPrice}\n` +
+        `👤 Nama Pembeli: ${name}\n` +
+        `📱 No. WhatsApp: ${phone}\n\n` +
+        `Saya sudah melakukan transfer. Mohon dikirimkan Serial Key resmi untuk perangkat saya. Terima kasih!`
+      );
+      
+      window.open(`https://wa.me/${SELLER_WA}?text=${msg}`, "_blank");
+    }
+
+    // Close on backdrop click
+    document.getElementById("checkoutModal").addEventListener("click", function(e) {
+      if (e.target === this) closeCheckoutModal();
+    });
+  </script>
 </body>
 </html>
