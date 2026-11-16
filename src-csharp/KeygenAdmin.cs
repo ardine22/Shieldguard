@@ -93,6 +93,17 @@ namespace ShieldGuardKeygen
             RefreshMemberList();
             UpdateStats();
 
+            // Real-Time Auto-Refresh Timer (Every 3 seconds)
+            System.Windows.Forms.Timer realTimeTimer = new System.Windows.Forms.Timer();
+            realTimeTimer.Interval = 3000;
+            realTimeTimer.Tick += (s, e) => {
+                LoadLocalData();
+                RefreshMemberList();
+                UpdateStats();
+                ThreadPool.QueueUserWorkItem(state => SyncCloudData(false));
+            };
+            realTimeTimer.Start();
+
             // Background check cloud connectivity and sync
             ThreadPool.QueueUserWorkItem(state => SyncCloudData(false));
         }
@@ -909,7 +920,7 @@ namespace ShieldGuardKeygen
                             string activeOwner = mOwner.Success ? mOwner.Groups[1].Value : "Pengguna Pro";
 
                             var target = allMembers.Find(x => x.Key == activeKey);
-                            if (target != null)
+                            if (target != null && (string.IsNullOrEmpty(target.BoundHwid) || target.BoundHwid == currentHwid))
                             {
                                 target.BoundHwid = currentHwid;
                                 target.DeviceName = currentDevice;
